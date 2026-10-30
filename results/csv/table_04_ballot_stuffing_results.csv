@@ -1,0 +1,5 @@
+attack,measure,measure_definition,system,mean,median,std,min,max
+ballot_stuffing,surviving_ge_m,P(surviving >= m): both gates -- HEADLINE,baseline,0.44162517230361775,1.7150166756039766e-05,0.4870815319352155,0.0,1.0
+ballot_stuffing,surviving_ge_m,P(surviving >= m): both gates -- HEADLINE,protected,0.11616839595237306,1.4106868659508518e-155,0.30976892259741023,0.0,1.0
+ballot_stuffing,accepted_ge_m,P(accepted >= m): acceptance gate only,baseline,0.497906379311596,0.4833798180637639,0.49258258706062186,0.0,1.0
+ballot_stuffing,accepted_ge_m,P(accepted >= m): acceptance gate only,protected,0.25349055830064743,1.6611099951635337e-55,0.42394790229652185,0.0,1.0

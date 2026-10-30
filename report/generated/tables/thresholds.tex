@@ -1,0 +1,21 @@
+\begin{table}[htbp]
+\centering
+\caption{Critical thresholds for the five benchmark scenarios under the baseline configuration.}
+\label{tab:thresholds}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrrrrrr}
+\toprule
+Scenario & $N$ & $m$ & $R^*$ & $q_v^*$ & $T_{\min}$ & $q_d^*$ & $B^*$ & $T^*$ & $m_\alpha$ & $m_\varepsilon$ & $P(X \geq m)$ \\
+\midrule
+S1 & 100 & 35 & 52 & 0.118 & 38 & 0.118 & 2,880 & 37 & 34 & --- & 0.423 \\
+S2 & 10,000 & 1,943 & 68 & 0.118 & 2,089 & 0.072 & 249,480 & 2,083 & 1,937 & --- & 0.328 \\
+S3 & 100,000 & 19,015 & 63 & 0.111 & 20,016 & 0.050 & 2,998,650 & 20,000 & 19,000 & 19,515 & 0.320 \\
+S4 & 5,000 & 4,758 & 26 & 0.167 & 5,008 & 0.051 & 499,400 & 5,000 & 4,750 & --- & 0.316 \\
+S5 & 5,000 & 550 & 26 & 0.167 & 579 & 0.000 & 57,100 & 0 & 76 & --- & 0.000 \\
+\bottomrule
+\end{tabular}%
+}
+\vspace{2pt}
+{\footnotesize\textit{Note.} $R^*$ minimum bribe a rational voter accepts (T1); $q_v^*$ voter-indifference detection (T2); $T_{\min}$ attempts for even odds (T3); $q_d^*$ critical detection at which attacking stops paying (T5); $B^*$ break-even budget (T4); $T^*$ utility-maximising attempts; $m_\alpha$ margin beaten at even odds (T7); $m_\varepsilon$ Chernoff-certified safe margin at $\varepsilon = 10^{-3}$ (T6). A dash means the threshold does not exist in the searched domain.}
+\end{table}

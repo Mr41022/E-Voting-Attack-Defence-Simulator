@@ -1,0 +1,14 @@
+Figure:
+appendix_adversary_decision_surface
+
+What this graph shows:
+The graph shows a coarse adversary decision surface for baseline attacker utility as a function of budget and detection probability.
+
+Main observation:
+The utility surface is most positive for moderate to low detection and sufficiently large budgets, while detection suppresses feasible profitable action.
+
+Why it matters:
+This figure is an implementation-aware approximation of the utility surface, not a full global optimisation over all budget and q pairs.
+
+Limitation:
+It does not establish that the adversary will always choose the same action in any real election system.

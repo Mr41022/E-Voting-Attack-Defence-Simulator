@@ -1,0 +1,234 @@
+{
+  "total_trials": 2500,
+  "seed": 42,
+  "attacks_run": [
+    "bribery",
+    "sybil",
+    "ballot_stuffing"
+  ],
+  "mc_trials_per_scenario": 2000,
+  "elapsed_seconds": 7.928974628448486,
+  "monte_carlo_convergence": {
+    "n": 200,
+    "p": 0.55,
+    "m": 120,
+    "exact_probability": 0.08807268309698309,
+    "sample_sizes": [
+      10,
+      30,
+      100,
+      300,
+      1000,
+      3000,
+      10000,
+      30000,
+      50000
+    ],
+    "tolerance": 0.01,
+    "settles_within_tolerance_from": 3000,
+    "settles_within_two_se_from": 30000,
+    "n_outside_two_se": 2,
+    "final_absolute_error": 0.0017726830969830853
+  },
+  "countermeasure_effectiveness": {
+    "bribery": {
+      "mean_baseline": 0.35009893118531027,
+      "mean_protected": 0.06351181309032469,
+      "absolute_reduction": 0.2865871180949856,
+      "relative_reduction": 0.8185889546269214,
+      "mean_paired_reduction": 0.28658711809498555,
+      "paired_reduction_std": 0.448343967585434,
+      "bootstrap_boot_mean": 0.2863757532914369,
+      "bootstrap_ci_low": 0.2688645583963656,
+      "bootstrap_ci_high": 0.3041099859358802
+    },
+    "sybil": {
+      "mean_baseline": 0.4803855052358909,
+      "mean_protected": 0.13556976306672003,
+      "absolute_reduction": 0.3448157421691709,
+      "relative_reduction": 0.7177896468792305,
+      "mean_paired_reduction": 0.344815742169171,
+      "paired_reduction_std": 0.4579619375491763,
+      "bootstrap_boot_mean": 0.3445337049994762,
+      "bootstrap_ci_low": 0.32676565899517795,
+      "bootstrap_ci_high": 0.3621604028437981
+    },
+    "ballot_stuffing": {
+      "mean_baseline": 0.44162517230361775,
+      "mean_protected": 0.11616839595237306,
+      "absolute_reduction": 0.3254567763512447,
+      "relative_reduction": 0.7369525035305117,
+      "mean_paired_reduction": 0.32545677635124465,
+      "paired_reduction_std": 0.451023794134122,
+      "bootstrap_boot_mean": 0.325589351854914,
+      "bootstrap_ci_low": 0.3083716870568991,
+      "bootstrap_ci_high": 0.34317502808706707
+    }
+  },
+  "monte_carlo_validation": {
+    "bribery": {
+      "mean_absolute_error": 7.983322389757979e-05,
+      "max_absolute_error": 0.014912274752514248,
+      "mean_relative_error": 0.07848804345231031
+    },
+    "sybil": {
+      "mean_absolute_error": 0.00039521562832532534,
+      "max_absolute_error": 0.030495646757350225,
+      "mean_relative_error": 0.4678035835023673
+    },
+    "ballot_stuffing": {
+      "mean_absolute_error": 0.0003942308371861547,
+      "max_absolute_error": 0.02304503710994238,
+      "mean_relative_error": 0.5422484818114888
+    }
+  },
+  "chernoff_validation": {
+    "bribery": {
+      "n_valid": 1088,
+      "mean_conservativeness": 0.04226902226821527,
+      "min_conservativeness": 0.0,
+      "max_conservativeness": 0.889550884161804,
+      "pct_bound_holds": 100.0
+    },
+    "sybil": {
+      "n_valid": 3471,
+      "mean_conservativeness": 0.025998638956590544,
+      "min_conservativeness": 0.0,
+      "max_conservativeness": 0.7549998432977332,
+      "pct_bound_holds": 100.0
+    },
+    "ballot_stuffing": {
+      "n_valid": 3604,
+      "mean_conservativeness": 0.021594786446365952,
+      "min_conservativeness": 0.0,
+      "max_conservativeness": 0.7360256661526824,
+      "pct_bound_holds": 100.0
+    }
+  },
+  "chernoff_certificate_validation": {
+    "bribery": {
+      "n_rows": 5000,
+      "n_upper_bounded": 126,
+      "n_lower_bounded": 1031,
+      "n_exact_by_construction": 3843,
+      "n_without_statement": 0,
+      "pct_interval_contains_exact": 100.0,
+      "mean_interval_width": 0.01822600194468805
+    },
+    "sybil": {
+      "n_rows": 5000,
+      "n_upper_bounded": 1867,
+      "n_lower_bounded": 1529,
+      "n_exact_by_construction": 1604,
+      "n_without_statement": 0,
+      "pct_interval_contains_exact": 100.0,
+      "mean_interval_width": 0.043823060830395104
+    },
+    "ballot_stuffing": {
+      "n_rows": 5000,
+      "n_upper_bounded": 1998,
+      "n_lower_bounded": 1396,
+      "n_exact_by_construction": 1606,
+      "n_without_statement": 0,
+      "pct_interval_contains_exact": 100.0,
+      "mean_interval_width": 0.04311790570040126
+    }
+  },
+  "baseline_statistics": {
+    "bribery": {
+      "mean": 0.35009893118531027,
+      "median": 0.0,
+      "std": 0.47430926900733805,
+      "min": 0.0,
+      "max": 1.0,
+      "ci_low": 0.33149734007669523,
+      "ci_high": 0.3687005222939253,
+      "n": 2500
+    },
+    "sybil": {
+      "mean": 0.4803855052358909,
+      "median": 0.05931757750889572,
+      "std": 0.49225916217217397,
+      "min": 0.0,
+      "max": 1.0,
+      "ci_low": 0.4610799502899374,
+      "ci_high": 0.4996910601818444,
+      "n": 2500
+    },
+    "ballot_stuffing": {
+      "mean": 0.44162517230361775,
+      "median": 1.7150166756039766e-05,
+      "std": 0.4870815319352155,
+      "min": 0.0,
+      "max": 1.0,
+      "ci_low": 0.4225226750815436,
+      "ci_high": 0.4607276695256919,
+      "n": 2500
+    }
+  },
+  "protected_statistics": {
+    "bribery": {
+      "mean": 0.06351181309032469,
+      "median": 0.0,
+      "std": 0.2421248488551906,
+      "min": 0.0,
+      "max": 1.0,
+      "ci_low": 0.05401609430526803,
+      "ci_high": 0.07300753187538137,
+      "n": 2500
+    },
+    "sybil": {
+      "mean": 0.13556976306672003,
+      "median": 5.195115153006655e-139,
+      "std": 0.32917237949158834,
+      "min": 0.0,
+      "max": 1.0,
+      "ci_low": 0.12266019033083986,
+      "ci_high": 0.1484793358026002,
+      "n": 2500
+    },
+    "ballot_stuffing": {
+      "mean": 0.11616839595237306,
+      "median": 1.4106868659508518e-155,
+      "std": 0.30976892259741023,
+      "min": 0.0,
+      "max": 1.0,
+      "ci_low": 0.10401979331516822,
+      "ci_high": 0.1283169985895779,
+      "n": 2500
+    }
+  },
+  "threshold_m_statistics": {
+    "bribery": {
+      "mean": 344.334,
+      "median": 273.5,
+      "std": 269.1127666615541,
+      "min": 5.0,
+      "max": 1206.0,
+      "ci_low": 336.87290526706556,
+      "ci_high": 351.79509473293444,
+      "n": 5000
+    },
+    "sybil": {
+      "mean": 344.334,
+      "median": 273.5,
+      "std": 269.1127666615541,
+      "min": 5.0,
+      "max": 1206.0,
+      "ci_low": 336.87290526706556,
+      "ci_high": 351.79509473293444,
+      "n": 5000
+    },
+    "ballot_stuffing": {
+      "mean": 344.334,
+      "median": 273.5,
+      "std": 269.1127666615541,
+      "min": 5.0,
+      "max": 1206.0,
+      "ci_low": 336.87290526706556,
+      "ci_high": 351.79509473293444,
+      "n": 5000
+    }
+  },
+  "most_resilient_attack_under_test_conditions": "sybil"
+}

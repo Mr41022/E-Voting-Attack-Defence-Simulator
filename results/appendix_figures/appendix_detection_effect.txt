@@ -1,0 +1,14 @@
+Figure:
+appendix_detection_effect
+
+What this graph shows:
+The graph shows how the signed attacker utility associated with the named scenarios changes as the detection probability rises.
+
+Main observation:
+The curves fall as q increases, showing that the defender’s detection policy compresses the attacker’s experimentally feasible region.
+
+Why it matters:
+It is useful because the defender can read an expected detector-learning threshold from a single curve rather than only from a point estimate.
+
+Limitation:
+The plot is scenario-specific and model-specific; it does not predict the behaviour of a live electorate.

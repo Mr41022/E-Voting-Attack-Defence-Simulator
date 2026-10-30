@@ -1,0 +1,352 @@
+%=======================================================================
+%  The Experiment in Depth
+%=======================================================================
+\section{The Experiment in Depth}
+\label{sec:experiment}
+
+This section describes exactly what was run. Section~\ref{sec:exp-anatomy}
+traces one real trial end to end with its actual numbers, and
+Sections~\ref{sec:exp-one}--\ref{sec:exp-sensitivity} give the protocol
+for each of the five experiments.
+
+\subsection{The five experiments}
+
+\begin{table}[htbp]
+\centering
+\caption{The five experiments, what each isolates, and what it produces.}
+\label{tab:experiments}
+\small
+\begin{tabular}{@{}p{0.5cm}p{3.0cm}p{5.0cm}p{4.6cm}@{}}
+\toprule
+\textbf{\#} & \textbf{Experiment} & \textbf{Isolates} & \textbf{Produces} \\
+\midrule
+E1 & Paired randomised trials &
+Countermeasure effect, holding the scenario fixed &
+\TotalTrials{} matched pairs per vector; RQ1--RQ3 \\
+\addlinespace
+E2 & Concrete mined elections &
+Whether abstract probabilities correspond to real winner flips &
+\ElectionTrials{} mined elections per vector; ground truth \\
+\addlinespace
+E3 & Benchmark scenarios &
+Behaviour at five interpretable, fixed operating points &
+Quotable per-scenario numbers; a negative control \\
+\addlinespace
+E4 & Threshold solving &
+The parameter value at which each attack stops being viable &
+Seven thresholds per scenario; RQ4 \\
+\addlinespace
+E5 & Coalition and sensitivity &
+Whether combining vectors beats the best single vector, and whether
+that survives the cost assumptions &
+231-point simplex search; \SensitivityConfigs-configuration sweep; RQ5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Anatomy of a single trial}
+\label{sec:exp-anatomy}
+
+The clearest way to describe the experiment is to follow one trial
+through it. Trial \WEtrial{} is used below. It is an ordinary trial
+drawn by the sampler, not a constructed illustration, and it was chosen
+because it happens to exhibit all three of the behaviours the model is
+built to distinguish.
+
+\subsubsection*{Step 1 --- Draw the scenario}
+
+The generator draws one scenario from the ranges of
+\tabref{tab:parameters}, using the trial's own stream from the seeded
+generator:
+
+\begin{center}
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+$N = \WEN$ voters & $m = \WEm$ votes & $B = \WEB$ & $R = \WER$ \\
+$P = \WEP$ & $S = \WES$ identities & $A = \WEA$ ballots & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The manipulation threshold is $m = \WEm$: the attack succeeds if and
+only if at least that many fraudulent votes survive every
+countermeasure and reach the count. Every number above is now
+\emph{fixed} for both arms of this pair. Only the acceptance and
+detection probabilities will differ.
+
+\subsubsection*{Step 2 --- Bribery: the feasibility constraint}
+
+The attacker can approach at most
+\[
+T = \min\!\left(N, \left\lfloor \frac{B}{R} \right\rfloor\right)
+  = \min\!\left(\WEN,\ \left\lfloor \frac{\WEB}{\WER} \right\rfloor\right)
+  = \WET \text{ voters},
+\]
+so the budget binds well before the electorate does. Note already that
+$T = \WET$ exceeds $m = \WEm$ --- the attack is \emph{arithmetically}
+possible --- but only just, which is what makes the survival
+probability decisive.
+
+\subsubsection*{Step 3 --- Bribery: the rational-voter gate}
+
+This is where the two arms diverge, and it is the most consequential
+step in the model.
+
+\emph{Baseline arm}, $q = \WEqBase$:
+\[
+\Uv = (1-q)R - qP
+    = (1 - \WEqBase)(\WER) - (\WEqBase)(\WEP)
+    = \WEUvBase > 0
+    \;\Rightarrow\; \text{voter } \WEdecisionBase\text{s}.
+\]
+
+\emph{Protected arm}, $q = \WEqProt$:
+\[
+\Uv = (1 - \WEqProt)(\WER) - (\WEqProt)(\WEP)
+    = \WEUvProt < 0
+    \;\Rightarrow\; \text{voter } \WEdecisionProt\text{s}.
+\]
+
+The attacker's budget, the electorate and the margin are identical in
+both arms. The bribe is simply no longer worth accepting. Under the
+protected configuration the attack contributes zero fraudulent votes
+not because they were detected and removed, but because they were never
+cast.
+
+\subsubsection*{Step 4 --- Bribery: distribution and success probability}
+
+In the baseline arm each bribed vote survives with probability
+$1 - q = \WEpsurviveBase$, so
+\[
+X \sim \Bin(\WET,\ \WEpsurviveBase),
+\qquad
+\mu = \Ex[X] = \WEmuBase .
+\]
+
+The mean $\mu = \WEmuBase$ sits \emph{below} the threshold $m = \WEm$,
+so the attack succeeds only on an upper-tail excursion. The exact
+probability is
+\[
+\Prob(X \geq \WEm) = \WEexactBase .
+\]
+
+Three methods are now applied to this same quantity:
+
+\begin{center}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Method} & \textbf{Value} & \textbf{Role} \\
+\midrule
+Exact binomial survival function & \WEexactBase & ground truth \\
+Monte Carlo, \MonteCarloTrials{} draws & \WEmcBase & independent numerical check \\
+Chernoff upper bound (M7) & \WEchernoffBase & provable ceiling \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+All three orderings that the mathematics requires hold: the Monte Carlo
+estimate is close to the exact value, and the bound lies above it. The
+bound is defined here precisely because $m > \mu$. In the protected arm
+the gate is closed, so $\Prob = \WEexactProt$ and the bound is
+\WEchernoffProt{} --- correctly reported as absent rather than as zero,
+since no bound was computed.
+
+\subsubsection*{Step 5 --- Sybil: two gates in series}
+
+The same trial, same threshold $m = \WEm$, with $S = \WES$ forged
+identities attempted. A forged identity must pass registration
+\emph{and} escape detection to place a counted vote:
+\[
+W \sim \Bin\big(S,\; q_s(1-p_d)\big).
+\]
+
+\emph{Baseline}, $q_s = \WEqsBase$, $p_d = \WEpdBase$:
+$\Ex[W] = \WEsybilmuBase$, which is more than twice the threshold, so
+$\Prob(W \geq m) = \WEsybilPBase$ --- effectively certain.
+
+\emph{Protected}, $q_s = \WEqsProt$, $p_d = \WEpdProt$:
+$\Ex[W] = \WEsybilmuProt$, now well below the threshold, so
+$\Prob(W \geq m) = \WEsybilPProt$.
+
+The mechanism differs from bribery's. Nothing refuses; the two gates
+simply tighten, the mean crosses from one side of the threshold to the
+other, and the probability follows it sharply because the binomial
+concentrates around its mean.
+
+\subsubsection*{Step 6 --- Ballot stuffing: structural infeasibility}
+
+The same trial attempts $A = \WEA$ fraudulent ballots against a
+threshold of $m = \WEm$. Since $A < m$, the attack cannot reach the
+threshold even if every single ballot were accepted and undetected:
+\[
+\Prob(W \geq \WEm) = \WEballotPBase \text{ (baseline)},
+\qquad
+\WEballotPProt \text{ (protected)} .
+\]
+
+The expected surviving counts --- \WEballotmuBase{} and
+\WEballotmuProt{} --- confirm how far short the attack falls. This is
+not a detection failure but a capacity limit, and it is the phenomenon
+that Section~\ref{sec:coalition} shows to be escapable by combining
+vectors.
+
+\subsubsection*{What this one trial demonstrates}
+
+\begin{finding}
+\finhead{Three distinct failure mechanisms, in one trial}
+Trial \WEtrial{} shows the model distinguishing three different reasons
+an attack fails. Bribery fails in the protected arm because the bribe
+stops being \emph{worth accepting} ($\Uv = \WEUvProt$). The Sybil
+attack fails because the expected surviving count crosses below the
+threshold (\WEsybilmuBase{} $\rightarrow$ \WEsybilmuProt{} against
+$m = \WEm$). Ballot stuffing fails in both arms because fewer ballots
+are attempted than the threshold requires ($A = \WEA < m = \WEm$) ---
+a structural limit no detection setting affects. A model reporting only
+aggregate success rates would collapse these three into one number and
+lose the distinction that tells a defender what to fix.
+\end{finding}
+
+\subsection{Experiment 1: paired randomised trials}
+\label{sec:exp-one}
+
+\textbf{Procedure.} Repeat the trial above \TotalTrials{} times per
+vector, drawing a fresh scenario each time and evaluating both arms.
+Per trial, record: the drawn parameters; the rational-voter decision;
+$T$; the exact, Monte Carlo and Chernoff values; expected surviving
+counts; detection probabilities; and attacker cost.
+
+\textbf{Output.} 5{,}000 rows per vector (baseline and protected for
+each of \TotalTrials{} pairs), 15{,}000 rows in the combined
+Chernoff-validation table, and an aggregate summary.
+
+\textbf{Analysis.} Paired differences are aggregated into means with
+bootstrap confidence intervals (10{,}000 resamples), and the exact
+value is compared against the Monte Carlo estimate and the Chernoff
+bound trial by trial.
+
+\textbf{What it controls for.} Because both arms share the scenario, any
+difference is attributable to the configuration alone. What it does
+\emph{not} control for is the choice of parameter ranges, which is why
+the ranges are broad and why the benchmark scenarios of E3 exist as a
+complementary fixed-point analysis.
+
+\subsection{Experiment 2: concrete mined elections}
+\label{sec:exp-two}
+
+E1 produces probabilities. E2 produces winners.
+
+\textbf{Procedure.} For each of \ElectionTrials{} trials per vector:
+
+\begin{enumerate}[leftmargin=1.7em,itemsep=2pt]
+\item Draw an electorate of 150--900 voters and a support level for
+      candidate B in $[0.35, 0.65]$, biased toward close races so that
+      the manipulation threshold is small enough for an attack to be
+      interesting.
+\item Every legitimate voter casts a ballot. The batch is sealed into a
+      genuinely mined block: proof-of-work at difficulty 3, meaning the
+      block hash must begin with three zeros, found by incrementing a
+      nonce until it does.
+\item Read the pre-attack tally \emph{from the chain} via
+      \code{count\_votes()} --- not from a Python-side running total.
+      This matters: the tally under test is the ledger's own.
+\item Compute the flip threshold $m$ from the actual margin
+      (\eqnref{eq:threshold}) and identify the losing candidate as the
+      attacker's target.
+\item Simulate each fraudulent attempt individually through the real
+      pipeline: an acceptance gate (bribe accepted / registration
+      passed / ballot validated), then a detection gate. Only votes
+      that are accepted \emph{and} undetected are mined into the chain.
+      Rejected and detected attempts are logged but never reach the
+      ledger, which is what a real countermeasure does --- a rejected
+      transaction is not a recorded vote.
+\item Read the post-attack tally from the chain, determine the winner,
+      and record whether it changed.
+\item Run \code{is\_chain\_valid()} to confirm the ledger is still
+      internally consistent: every hash correct, every link intact,
+      every block satisfying the difficulty target.
+\end{enumerate}
+
+Both arms run against \emph{the same starting election}, so the pairing
+of E1 is preserved: the two configurations are handed an identical
+mined chain and an identical margin.
+
+\textbf{What it establishes.} Two things. First, that the abstract
+probabilities correspond to real outcomes rather than to an artefact of
+the abstraction. Second --- and this is the finding the dissertation
+turns on --- that chain integrity and election correctness are
+independent: the validity check passes in every trial, including the
+ones where the winner changed.
+
+\subsection{Experiment 3: benchmark scenarios}
+\label{sec:exp-three}
+
+E1 averages over a distribution of scenarios, which is statistically
+powerful and hard to reason about concretely. E3 fixes five
+interpretable operating points --- a university election ($N = \SOneN$),
+an organisation election ($N = \STwoN$), a national election
+($N = \SThreeN$), a maximum-capability high-budget attack, and a
+deliberately under-resourced low-budget attack --- and evaluates each
+exactly, by Monte Carlo, by Chernoff bound and by the game-theoretic
+optimiser.
+
+S5 is a negative control. Its threshold is set far beyond what its
+budget can reach, and the model is expected to report it as failing; a
+model that reported S5 succeeding would be wrong in a way that no
+amount of aggregate statistics would reveal. It reports
+$P = \SFiveExactFlip$.
+
+\subsection{Experiment 4: threshold solving}
+\label{sec:exp-four}
+
+For each benchmark scenario, the seven thresholds of
+Section~\ref{sec:thresholds} are solved.
+
+\textbf{Closed-form thresholds} (T1, T2) are evaluated directly. T2 is
+also verified against the numerically computed zero contour of the
+utility surface, and the two coincide (\figref{fig:utility}).
+
+\textbf{Integer thresholds} (T3, T6, T7) are found by binary search
+over a monotone function, which is exact. For T6 the search runs over
+margins above the mean, where the Chernoff bound decreases
+monotonically.
+
+\textbf{Continuous thresholds} (T4, T5) are found by bisection on the
+signed utility of attacking. Each solver first checks that the endpoints
+bracket a crossing, and returns an explicit absence if they do not ---
+which is what happens for $B^*$ under the protected configuration,
+where no budget makes the attack profitable because the bribe is not
+incentive-compatible at any budget.
+
+Two supporting sweeps generate the data behind \figref{fig:critical}
+and the break-even budget: utility against detection probability across
+$q \in [0, 1]$, and utility against budget up to three times the
+scenario budget, both for every scenario and both arms.
+
+\subsection{Experiment 5: coalition and sensitivity}
+\label{sec:exp-sensitivity}
+
+\textbf{Coalition search.} For each scenario and arm, the three vectors
+are placed on a common budget line by assigning unit costs: a bribe
+costs $R$; a forged identity costs \IdentityCostRatio\% of $R$; an
+injected ballot costs \BallotCostRatio\% of $R$. Structural ceilings
+apply --- bribery at $N$ by \eqnref{eq:m3}, forged registrations at
+\SybilCeilingPct\% of $N$, injected ballots at \BallotCeilingPct\% of
+$N$. The budget simplex is then evaluated exhaustively at a 0.05 step,
+231 allocations, each scored by the exact convolution of the three
+component distributions. The best allocation is compared against the
+best pure single-vector strategy, which is a corner of the same
+simplex.
+
+\textbf{Sensitivity sweep.} The four constants above have no empirical
+basis, so the entire coalition analysis is re-run across their product:
+identity cost in $\{0.2, 0.4, 0.8\}$, ballot cost in $\{0.05, 0.15,
+0.40\}$, registration ceiling in $\{0.10, 0.20\}$ and ballot ceiling in
+$\{0.15, 0.30\}$, for three scenarios --- \SensitivityConfigs{}
+configurations in total. For each, the analysis records whether the
+coalition still beats the best pure strategy.
+
+This is the check that decides whether the coalition finding is a
+result or an artefact of convenient parameters, and it is reported as
+such in Section~\ref{sec:findings-coalition}.

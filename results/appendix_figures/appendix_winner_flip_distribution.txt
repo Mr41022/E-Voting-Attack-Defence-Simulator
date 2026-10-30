@@ -1,0 +1,14 @@
+Figure:
+appendix_winner_flip_distribution
+
+What this graph shows:
+The graph shows the concrete winner-flip distribution in the mined-election dataset for the three attack vectors.
+
+Main observation:
+The distribution is concentrated at outcomes where an attack flips the elected winner, while the protected rows are much less numerous or absent.
+
+Why it matters:
+It matters because it authenticates the outcome-level claim: the attack must be judged by a real election winner change, not only by an abstract attack probability.
+
+Limitation:
+It does not display the internal chain structure or the rejection process that led to a non-flip.

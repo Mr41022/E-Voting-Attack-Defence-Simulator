@@ -1,0 +1,14 @@
+Figure:
+appendix_voter_utility
+
+What this graph shows:
+The graph shows the voter utility surface and the incentive-compatible zero contour for the bribery model.
+
+Main observation:
+The utility field changes sign across the anti-bribery threshold, so the expected behaviour of a rational voter is visible directly.
+
+Why it matters:
+It matters because it separates the purely threshold logic of the model from the feasibility of any bribery attack.
+
+Limitation:
+It does not predict real individual voting behaviour under all human conditions.

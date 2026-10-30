@@ -1,0 +1,473 @@
+%=======================================================================
+%  Research Design and Methodology
+%=======================================================================
+\section{Research Design and Methodology}
+\label{sec:methodology}
+
+\subsection{Research strategy: why simulation}
+
+The research questions ask what \emph{would} happen to an election
+under attack. That rules out the two obvious empirical strategies. A
+field experiment is unethical and illegal: it would require attempting
+to corrupt a real election. Observational study of historical fraud
+suffers from severe selection bias, because only detected fraud is
+observable and detected fraud is by definition the fraud that failed at
+the part this dissertation measures.
+
+The strategy adopted is therefore \textbf{computational simulation with
+analytical validation}: construct a formal model of the attack, compute
+its consequences exactly where closed forms exist, simulate where they
+do not, and validate the two against each other. The claims that result
+are conditional --- ``under this model, with these parameters, the
+following follows'' --- and the burden of the design is to make the
+conditions explicit, the computation correct, and the results
+reproducible.
+
+Three commitments follow, and they shape everything below.
+
+\textbf{Exactness before estimation.} Where a quantity has a closed
+form it is computed exactly, not estimated. Attack success probability
+is the binomial survival function
+(\eqnref{eq:m5}), evaluated through the regularised incomplete beta
+function; the coalition distribution is an exact convolution
+(Section~\ref{sec:coalition-model}); the threshold solvers are exact
+binary searches or bisections on monotone functions. Monte Carlo is
+used to \emph{validate} these exact values and to reach quantities that
+have no closed form, not as the primary method. This inverts the more
+common simulation-study design, and it is what allows the Monte Carlo
+error itself to be reported as a result
+(Section~\ref{sec:findings-methods}).
+
+\textbf{Falsifiability by construction.} Wherever a modelling decision
+could flatter the conclusion, the design includes a mechanism that
+would expose it. The Chernoff bound is checked against the exact value
+in every trial, so a wrongly-implemented bound would show as a
+violation rather than as a plausible number. The coalition convolution
+is checked against a 200{,}000-draw Monte Carlo simulation in the test
+suite. Reproducibility is enforced by a test that fails if two runs at
+the same seed differ, and by a second test that fails if two runs at
+\emph{different} seeds agree --- so the first test cannot pass
+vacuously.
+
+\textbf{Assumptions declared and swept.} Every modelling assumption is
+recorded in \code{ASSUMPTIONS.md} and cross-referenced from the module
+that relies on it. Where an assumption is both consequential and
+ungrounded --- the relative costs of the three vectors, the capacity
+ceilings --- it is not merely declared but swept, and the conclusion is
+reported as a function of it (Section~\ref{sec:exp-sensitivity}).
+
+\subsection{A two-layer architecture, and why both layers are necessary}
+\label{sec:method-twolayer}
+
+The implementation has two layers that answer the same questions by
+different means.
+
+The \textbf{concrete layer} is a working blockchain e-voting
+application: SHA-256 block hashing, proof-of-work mining, chain
+validation, voter registration, role-based election administration,
+duplicate-vote prevention and result publication. Attacking it produces
+an actual winner change on an actual mined chain.
+
+The \textbf{abstract layer} is the mathematical framework: exact
+binomial evaluation, Chernoff bounds, Monte Carlo, the threshold
+solvers and the game-theoretic optimisers. It produces probabilities
+rather than outcomes.
+
+Neither layer alone would support the conclusions. The abstract layer
+supplies statistical power --- \TotalTrials{} paired trials complete in
+\RuntimeSeconds{} seconds, whereas mining that many elections is
+infeasible --- but every one of its numbers is a probability computed
+under a model, and a model can be wrong in ways that are invisible from
+inside it. The concrete layer supplies ground truth --- a real tally, a
+real winner, a real chain whose integrity is checked after every attack
+--- but at a sample size (\ElectionTrials{} elections) too small for
+the parameter sweeps.
+
+Running both is a complementary analysis, not a validation of one
+estimand by the other. The concrete experiment uses different electorate
+and attack-resource ranges and derives its threshold from a realised
+two-candidate margin, whereas E1 uses the abstract parameter distribution.
+Section~\ref{sec:findings-concrete} therefore compares direction and
+interpretation only; it does not claim that the two rates estimate the same
+quantity.
+
+\subsection{Variables and operationalisation}
+
+\tabref{tab:variables} states how each construct is operationalised.
+The distinction that matters most is between the three
+\emph{independent} variables the experiment manipulates and the
+\emph{control} variables that are held identical across the paired
+arms.
+
+\begin{table}[htbp]
+\centering
+\caption{Operationalisation of the model's variables.}
+\label{tab:variables}
+\small
+\begin{tabular}{@{}p{2.5cm}p{2.6cm}p{8.4cm}@{}}
+\toprule
+\textbf{Role} & \textbf{Variable} & \textbf{Operationalisation} \\
+\midrule
+Independent & System configuration & Two levels: baseline (weak detection
+and validation) and protected (blockchain-style audit, signatures,
+identity verification, ballot validation --- modelled as higher
+detection and lower acceptance probabilities). \\
+\addlinespace
+Independent & Attack vector & Three levels: bribery, Sybil
+registration, ballot stuffing; plus the coalition of all three in
+Section~\ref{sec:coalition}. \\
+\addlinespace
+Independent & Attacker resources & Budget $B$ and reward $R$, entering
+through the feasibility constraint $T = \min(N, \lfloor B/R \rfloor)$. \\
+\addlinespace
+Dependent & Attack success probability & $\Prob(W \geq m)$, where $W$
+counts fraudulent votes surviving every countermeasure. Computed
+exactly; also estimated by Monte Carlo and bounded by Chernoff. \\
+\addlinespace
+Dependent & Election flip & Binary: did the winner of a concretely
+mined election change? Measured only in the concrete layer. \\
+\addlinespace
+Dependent & Attacker expected utility & \eqnref{eq:utility}: payoff
+weighted by flip probability, less cost, less expected penalty. \\
+\addlinespace
+Control & Scenario structure & $N, m, B, R, P, S, A$ --- identical
+between the two arms of every pair by construction. \\
+\addlinespace
+Control & Random stream & A single seeded generator; identical seed
+gives identical output bit-for-bit. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{What the ledger contributes, and what it does not}
+\label{sec:method-attribution}
+
+Because the protected configuration bundles several controls together,
+it is worth stating precisely which component does what before any
+result is reported. The pipeline is ordered, and the ordering is the
+whole point:
+
+\begin{center}
+\small
+fraud attempt $\rightarrow$ \textbf{acceptance / identity / signature /
+ballot validation} $\rightarrow$ \textbf{detection} $\rightarrow$
+surviving votes only $\rightarrow$ \textbf{ledger records them}
+\end{center}
+
+Every fraudulent vote that is stopped in this model is stopped by the
+validation or detection stage. The ledger sits at the end of the
+pipeline and records whatever survives; it contributes integrity,
+immutability, auditability and tamper evidence, and it contributes
+nothing whatever to deciding \emph{whether a vote should have been
+cast}. A blockchain cannot tell that a genuine voter was paid, that a
+registration was forged, or that a ballot was injected --- those are
+determined upstream, by mechanisms that would work equally well behind
+a conventional append-only audit log.
+
+This distinction is preserved in the experimental design rather than
+merely asserted in the prose. The concrete layer runs the chain's own
+validity check after every attack, so the two properties are measured
+separately: the ledger's integrity, and the election's correctness. The
+\emph{Findings} chapter reports that these come apart completely ---
+integrity held in every trial, and elections were flipped anyway.
+
+Nothing in this dissertation should therefore be read as showing that
+``blockchain prevents bribery'', or Sybil attacks, or ballot stuffing.
+The claim supported by the results is narrower and conditional: under
+the assumptions of this model and over the sampled parameter ranges, a
+protected architecture combining ledger-backed auditability with
+identity verification, signature validation, ballot validation and
+raised detection substantially reduces attack feasibility.
+
+The dependent variable deserves one clarification. ``Attack success''
+is defined throughout as reaching the manipulation threshold $m$, which
+is the number of additional fraudulent votes needed to overturn the
+margin (\eqnref{eq:threshold}). It is not defined as ``some fraud
+occurred'' or ``fraud was undetected''. This is a deliberately
+demanding definition: an attack that places a hundred fraudulent votes
+into an election it fails to flip counts, here, as a failure.
+
+\subsection{Parameter selection and its justification}
+\label{sec:method-params}
+
+Parameter ranges (\tabref{tab:parameters}) were selected to span
+plausible deployment conditions rather than to be estimated from data,
+because for most of these quantities no defensible estimate exists. The
+probability that a forged voter registration is detected is not
+published by any electoral authority in a form that would support a
+point estimate. Three consequences follow, and the design accommodates
+all three.
+
+\textbf{Ranges, not points.} Every parameter is sampled from a range on
+every trial, so no result depends on a single assumed value. The
+electorate is drawn from the configured range 200--5{,}000, realising
+\ElectorateMin{} to \ElectorateMax{} across the trials actually run, and the
+threshold $m$ is itself randomised as 2--25\% of $N$, so the reported
+means are averages over a distribution of scenarios rather than
+properties of one configuration.
+
+\textbf{Direction of bias stated.} Where a choice could flatter either
+side it is made against the conclusion being argued. Legitimate ballots
+always pass validation, so the model never credits the defence with
+catching fraud by accident. Detection is applied independently per
+item, which is more favourable to the attacker than correlated
+detection, since an audit that catches one item usually catches its
+batch.
+
+\textbf{Sensitivity where it matters.} The coalition analysis depends
+on four constants with no empirical basis --- two relative costs and
+two capacity ceilings. Rather than defend particular values, the
+analysis re-runs across \SensitivityConfigs{} combinations of them and
+reports the conclusion's stability
+(Section~\ref{sec:exp-sensitivity}).
+
+The benchmark scenarios (S1--S5) are calibrated differently and for a
+different purpose. For S1--S4 the threshold $m$ is placed close to the
+baseline mean $\mu$ rather than at an extreme. This is necessary for
+the three-method comparison to be informative: a threshold far below
+$\mu$ makes success trivially certain, one far above makes it trivially
+impossible, and the \emph{upper-tail} Chernoff form is not defined
+when $m \leq \mu$ --- the gap that Section~\ref{sec:certificate}
+closes with a lower-tail certificate. S5 is the deliberate exception --- a threshold far beyond what
+its budget can reach --- and functions as a negative control: a model
+that reported S5 as succeeding would be wrong in an obvious way.
+
+\subsection{Paired randomised design}
+\label{sec:method-paired}
+
+The core experiment is a \textbf{matched-pairs design}. Each trial
+draws one scenario and evaluates it twice, under both configurations,
+with identical $N, m, B, R, P, S, A$ and identical random streams. Only
+the acceptance and detection probabilities differ.
+
+The alternative --- drawing independent samples for each arm --- would
+confound the countermeasure effect with the difference between the
+scenarios happening to be drawn for each arm. Because the per-trial
+success probability has a standard deviation of \BriberyBaselineStd{}
+for bribery, scenario-to-scenario variance dominates the effect being
+measured, and an unpaired design would need far more trials to reach
+the same precision. Pairing removes that variance entirely: the
+reported reduction is a within-scenario effect, and every pair is its
+own control.
+
+\textbf{Inference.} Confidence intervals are computed by bootstrap
+resampling of the paired differences (10{,}000 resamples) rather than
+by a normal approximation. This is not a stylistic preference. The
+per-trial success probabilities are strongly bimodal --- most scenarios
+are either comfortably safe or comfortably lost --- which is visible in
+the summary statistics: the baseline bribery distribution has a mean of
+\BriberyBaseline{} but a median of \BriberyBaselineMedian. A
+distribution with that shape violates the assumptions of a
+$t$-interval, and the bootstrap makes no distributional assumption.
+
+\textbf{Trial count.} \TotalTrials{} pairs per vector were run, above
+the 1{,}000 originally specified, chosen so that the bootstrap
+intervals on the mean reduction are narrow relative to the effect: the
+bribery reduction interval $[\BriberyCILow, \BriberyCIHigh]$ has a
+width under 0.04 against an effect of \BriberyAbsReduction.
+
+\subsection{Triangulation of three computational methods}
+\label{sec:method-triangulation}
+
+Every trial computes its success probability three ways --- exact
+binomial, Monte Carlo, and Chernoff bound where valid --- on identical
+inputs. This is methodological triangulation, and each method plays a
+distinct role.
+
+\begin{description}[leftmargin=1.3em,style=nextline,itemsep=2pt]
+\item[Exact binomial.] The ground truth. Every reported probability is
+  this value; the other two exist to check it and to characterise their
+  own usefulness.
+\item[Monte Carlo.] An independent numerical path to the same quantity,
+  through a different code path (sampling rather than the survival
+  function). Agreement is evidence that neither contains an error;
+  its error against the exact value quantifies how much simulation is
+  needed for a given precision (RQ2).
+\item[Chernoff bound.] A provable upper bound. Its role is not accuracy
+  but \emph{certification}: a margin the bound rules out is ruled out
+  regardless of simulation effort. Its looseness is measured and
+  reported rather than treated as a defect.
+\end{description}
+
+The three are computed on the same trial, not on separate runs, which
+is what makes the comparison a validation rather than a coincidence.
+Critically, the bound is applied only where mathematically valid: the
+dispatcher determines whether $m$ lies in the upper tail, the lower
+tail, or neither, and returns no bound with a machine-readable reason
+outside those regions. Averaging the three quantities across
+heterogeneous trials --- as an earlier iteration of this work did ---
+compares them on different sub-populations, since the bound exists only
+where $m > \mu$; \figref{fig:detection} therefore holds every other
+parameter fixed and sweeps only $q$.
+
+\subsection{Threshold solver design}
+\label{sec:method-thresholds}
+
+The threshold solvers (T1--T7) invert the model, and three design
+decisions govern their trustworthiness.
+
+\textbf{Non-existence is a result.} Each solver returns a structured
+object carrying either a value or an explicit absence with a
+machine-readable reason. No solver substitutes an endpoint, a zero or a
+sentinel for a threshold that does not exist, and the figures print
+``does not exist'' rather than drawing a line. A threshold silently
+defaulted to a domain boundary would be indistinguishable, in a plot,
+from a real finding.
+
+\textbf{Exactness where the domain is discrete.} T3, T6 and T7 search
+over integers and use binary search, which is exact because each
+underlying function is monotone in the search variable: $\Prob(X \geq
+m)$ is non-decreasing in $n$, and the Chernoff bound is decreasing in
+$m$ above the mean. These are not approximations.
+
+\textbf{A definitional choice, stated.} T4 and T5 required resolving an
+ambiguity in what ``the attacker's utility'' means. The headline
+optimiser searches $T \geq 0$ and therefore includes declining to
+attack, so its optimum is never negative --- and a quantity floored at
+zero cannot be bisected for a zero crossing. The thresholds are
+consequently defined on $\max_{T \geq 1} U(T)$, the signed payoff of
+actually attacking, which goes negative exactly when attacking loses
+money. This is a definition rather than a derivation, it changes the
+reported numbers, and it is stated wherever those thresholds appear.
+
+\subsection{Coalition search design}
+\label{sec:method-coalition}
+
+The coalition analysis searches the budget simplex exhaustively at a
+0.05 step (231 allocations for three vectors) rather than using
+continuous optimisation. The reason is structural: the objective is
+piecewise flat wherever $\lfloor B/c \rfloor$ does not change, so
+gradients are zero almost everywhere and undefined at the steps, which
+defeats gradient methods. Exhaustive evaluation is affordable because
+each evaluation is a convolution rather than a simulation. The reported
+optimum is the best grid point and may differ slightly from the true
+continuous optimum --- stated as a limitation rather than glossed.
+
+The success probability of a coalition is computed exactly. A sum of
+binomials with unequal success probabilities is not binomial and has no
+closed form, and the obvious approximations (normal, Poisson) are least
+accurate precisely in the tail that matters. Convolving the component
+PMFs is exact, and truncating each at $m-1$ before convolving is also
+exact rather than approximate, since $\Prob(W \geq m) = 1 - \Prob(W
+\leq m-1)$ and no combination summing to at most $m-1$ can involve a
+component larger than $m-1$. That truncation is what makes
+national-scale margins tractable: it holds the transform length at $m$
+rather than at the total attempt count, which is two orders of
+magnitude larger.
+
+\subsection{Validation and verification}
+\label{sec:method-validation}
+
+Correctness is established at four levels.
+
+\textbf{Unit level (\TestCount{} tests).} Beyond routine coverage, several tests
+encode properties the mathematics requires and that a plausible-looking
+implementation can silently violate: that the lower-tail Chernoff bound
+carries a negative exponent, since a positive one yields a ``bound''
+exceeding 1 that is vacuous but looks reasonable in output; that the
+bound is never returned outside its region of validity; that $T = 0$
+rather than a division error when $B = 0$, $R = 0$ or $B < R$; and that
+each threshold solver's answer actually brackets the crossing it claims
+to find.
+
+\textbf{Cross-method level.} The exact and Monte Carlo values are
+compared on every trial; the Chernoff bound is checked against the
+exact value on every trial where it is defined. A violation would
+appear as a bound lying below the exact value it is supposed to bound
+(\figref{fig:twosided}); none occurs across \BriberyChernoffValid{},
+\SybilChernoffValid{} and \BallotStuffingChernoffValid{} valid trials
+respectively.
+
+\textbf{Cross-layer level.} The abstract probabilities and the concrete
+mined-election flip rates are compared for ordering and magnitude
+(Section~\ref{sec:findings-concrete}).
+
+\textbf{Reproducibility level.} A test asserts that two runs at the same
+seed produce identical output, and a second asserts that different
+seeds do not, so the first cannot pass vacuously.
+
+\subsection{Figure geometry on a discrete support}
+\label{sec:method-figure-geometry}
+
+Every random variable in this model is integer-valued: surviving
+fraudulent votes, attempts, and margins are counts. That is a property
+of the model with a consequence for how its distributions are drawn,
+and it is recorded here because a figure can be numerically exact and
+still mislead --- a failure mode no numerical test detects.
+
+Plotting a discrete probability mass function as unit-width centred
+bars places the bar for outcome $k$ on the interval $[k-0.5,\,k+0.5]$.
+The event $\{X \geq m\}$ therefore occupies the region whose left edge
+lies at $m - 0.5$, not at $m$. Drawing the labelled threshold line at
+$m$ places it through the \emph{centre} of the first bar of the success
+region, so the colour change appears to begin half a vote before the
+threshold it is labelled with, even though the shaded probability mass
+is exactly correct. An earlier draft of \figref{fig:pmf} contained
+precisely this defect. It was found visually in review rather than by
+any test, which is why the three tests that now pin it were written
+afterwards.
+
+The convention adopted throughout is that boundaries between integer
+outcomes are drawn at half-integers and labelled with the integer
+margin they separate: the manipulation threshold at $m - 0.5$, the
+reachable margin $m_\alpha$ at $m_\alpha + 0.5$ (since margins at or
+\emph{below} $m_\alpha$ are reachable), and the certified margin
+$m_\varepsilon$ at $m_\varepsilon - 0.5$ (since margins at or
+\emph{above} $m_\varepsilon$ are certified). Quantities that are
+genuinely continuous are not moved: the mean $\mu = T(1-q)$ is an
+expectation rather than a boundary between outcomes, and is drawn at
+its true coordinate.
+
+The correction changes no probability, threshold, table or finding in
+this report: the shaded mass of \figref{fig:pmf} agreed with
+$P(X \geq m)$ to machine precision both before the correction and
+after it. Three tests in
+\code{tests/test\_figure\_geometry.py} now pin the geometry by
+interrogating the plotting library's rectangle and line coordinates
+directly, so the visual property is verified in the same way as the
+numerical ones rather than left to the eye.
+
+\subsection{Reproducibility protocol}
+\label{sec:reproducibility}
+
+All randomness derives from a single seeded
+\code{numpy.random.Generator}; no global random state is used anywhere,
+and no unseeded standard-library random calls exist in the codebase.
+Re-running with seed \Seed{} reproduces every number in this report
+bit-for-bit --- verified by regenerating the full pipeline from a clean
+results directory and comparing the summary output. The threshold and
+coalition analyses are fully analytic and require no seed at all.
+
+The report itself is part of the protocol. Every \emph{experimental
+result} in the prose is injected at build time from
+\code{results/json/} and \code{results/csv/} as a \LaTeX{} macro rather
+than typed. A macro whose experiment has not been run causes the
+document to fail compilation rather than to print a stale value, so the
+text cannot silently disagree with the data it describes. The exceptions
+are deliberate and are not results: configuration values quoted from
+\code{config.py}, worked-example arithmetic shown at reduced precision
+so that it reads on the page, and the analytic counter-examples of
+Section~\ref{sec:tailforms}, which are computed and regression-tested in
+\code{tests/test\_chernoff.py} rather than in the results pipeline.
+
+\subsection{Ethical considerations}
+
+This work models attacks on elections, which warrants explicit
+treatment.
+
+No real system, election, voter or personal datum is involved at any
+point. All identifiers are simulation-internal indices; the candidates
+are \emph{A} and \emph{B} and have no referent. The artefact is a
+mathematical model, not a tool: it computes probabilities and contains
+no capability that could be directed at a deployed system, and nothing
+in it constitutes an exploit, a technique for evading a specific
+control, or an implementation of one.
+
+The disclosure balance favours publication. The vectors modelled ---
+bribery, Sybil registration, ballot stuffing --- are long-established
+in the literature reviewed in Section~\ref{sec:litreview}, and the
+contribution is a quantification of their effect and of the
+countermeasure strength required to blunt them. That quantification is
+of substantially more use to a defender, who can act on a detection
+threshold, than to an attacker, who learns only that the attacks they
+already knew about work about as well as expected.

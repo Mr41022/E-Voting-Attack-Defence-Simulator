@@ -1,0 +1,371 @@
+%=======================================================================
+%  Literature Review
+%=======================================================================
+\section{Literature Review}
+\label{sec:litreview}
+
+\subsection{Scope and method of the review}
+
+This review covers four bodies of work that the dissertation draws
+together, and it is organised by the question each body answers rather
+than chronologically.
+
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{What has been built, and what is claimed for it?}
+        Electronic and blockchain-based voting systems, from
+        cryptographic verifiable-voting schemes to ledger-backed
+        proposals (Sections~\ref{sec:lit-evoting}--\ref{sec:lit-bcvoting}).
+  \item \textbf{What breaks when it is deployed?} The empirical
+        security literature: analyses of fielded internet-voting systems
+        and the critical response to blockchain voting specifically
+        (Section~\ref{sec:lit-critique}).
+  \item \textbf{How is manipulation modelled formally?} Bribery as a
+        computational problem, coercion and receipt-freeness, Sybil
+        identity attacks, and the statistical forensics of fraudulent
+        tallies (Sections~\ref{sec:lit-bribery}--\ref{sec:lit-forensics}).
+  \item \textbf{What tools exist for reasoning about a rational,
+        resource-bounded attacker?} Concentration inequalities and
+        game-theoretic security analysis
+        (Section~\ref{sec:lit-probgame}).
+\end{enumerate}
+
+Sources were located by targeted search of the primary security venues
+(USENIX Security, ACM CCS, Financial Cryptography, IEEE S\&P and their
+workshops), the artificial-intelligence and economics literature for
+the manipulation-theory strand, and two recent systematic reviews of
+blockchain voting~\cite{ohize2025,rahul2025} used as entry points into
+the applied literature. Priority was given to peer-reviewed primary
+sources; where a widely-cited result exists only as a technical report
+or research blog post, as with the Dark DAO
+construction~\cite{daian2018}, this is stated explicitly rather than
+disguised by citation formatting.
+
+Section~\ref{sec:lit-synthesis} closes the review by identifying what
+the four bodies of work leave unaddressed, which is the gap this
+dissertation occupies.
+
+\subsection{Electronic voting before blockchain}
+\label{sec:lit-evoting}
+
+The security requirements for an electronic election were substantially
+settled before distributed ledgers entered the conversation, and it is
+worth restating them because blockchain proposals are frequently
+evaluated against a narrower list.
+
+\textbf{Verifiability.} A voter should be able to confirm that their
+ballot was recorded as cast, and any observer should be able to confirm
+that the recorded ballots were tallied correctly. Adida's
+Helios~\cite{adida2008} is the canonical open-audit implementation: it
+publishes encrypted ballots to a public bulletin board and proves the
+tally correct with homomorphic encryption and zero-knowledge proofs, so
+that correctness rests on mathematics rather than on trusting the
+election authority. Helios matters to the present work as a
+counterexample to a common framing: it delivers public verifiability
+with no ledger, no chain and no consensus mechanism, which shows that
+the verifiability argument for blockchain voting is not an argument for
+blockchain specifically.
+
+\textbf{Ballot secrecy and its stronger forms.} Secrecy alone is
+insufficient if a voter can \emph{prove} how they voted, because a
+provable vote is a sellable vote. Benaloh and
+Tuinstra~\cite{benaloh1994} formalised \emph{receipt-freeness}: the
+requirement that a voter cannot construct a convincing proof of their
+choice even if they want to. Juels, Catalano and
+Jakobsson~\cite{juels2005} strengthened this to
+\emph{coercion-resistance}, covering an adversary who can interact with
+the voter during voting, demand credentials, or require abstention;
+their scheme lets a coerced voter surrender a fake credential
+indistinguishable from a real one.
+
+This distinction sets the boundary of the present work. Bribery, as
+modelled here, presupposes that the briber can verify compliance well
+enough for the transaction to be worth making. A system that is
+genuinely receipt-free undermines that presupposition at the root,
+which is a different and stronger defence than the detection-based one
+modelled in this dissertation. The \emph{Limitations} chapter of the full dissertation returns to this.
+
+\subsection{Blockchain-based voting proposals}
+\label{sec:lit-bcvoting}
+
+Nakamoto's chained proof-of-work construction~\cite{nakamoto2008}
+supplied a mechanism with obvious surface appeal for elections: an
+append-only, hash-linked, replicated log in which retrospective edits
+invalidate every subsequent hash and are therefore detectable by anyone
+holding a copy.
+
+The most rigorous academic instantiation is McCorry, Shahandashti and
+Hao's Open Vote Network~\cite{mccorry2017}, a boardroom-voting protocol
+implemented as an Ethereum smart contract, which achieves maximum voter
+privacy in the sense that a vote can only be revealed by full collusion
+of all remaining participants, and which is self-tallying: no trusted
+authority computes the result. It is a genuine cryptographic
+contribution rather than a ledger with ballots written into it. Its
+scope, however, is explicitly the boardroom --- tens of voters, all
+known to one another --- and its cost and collusion properties do not
+transfer to a public election.
+
+The wider applied literature is large and, by the assessment of its own
+systematic reviewers, uneven. Ohize et al.~\cite{ohize2025} survey
+architectures and trends across the field and identify scalability,
+post-quantum security, voter authentication, regulatory frameworks and
+cross-chain interoperability as the persistent open problems. Rahul,
+Gulia and Gill~\cite{rahul2025} review 55 journal articles and reach a
+similar conclusion, noting that security, transparency and trust remain
+unresolved worldwide rather than settled by any existing proposal. Two
+observations from these reviews shape the present work. First,
+\emph{voter authentication} is repeatedly named as an open problem,
+which is precisely the Sybil vector modelled here. Second, the surveyed
+proposals are overwhelmingly evaluated on functionality, throughput and
+cryptographic properties rather than on quantified resistance to a
+budgeted attacker --- the gap this dissertation addresses.
+
+\subsection{The critical response: what happens on deployment}
+\label{sec:lit-critique}
+
+Against the proposal literature stands a smaller and considerably more
+sobering body of empirical analysis.
+
+Springall et al.~\cite{springall2014} examined Estonia's I-voting
+system, the most established national internet-voting deployment, by
+observing operations directly and reconstructing the system in the
+laboratory. They reported serious procedural lapses and architectural
+weaknesses sufficient, in their assessment, for a state-level attacker
+to alter results undetectably, and recommended discontinuing the
+system. The finding relevant here is not the specific vulnerabilities
+but the location of them: the client platform and the operational
+procedures surrounding the count, not the cryptography.
+
+Specter, Koppel and Weitzner~\cite{specter2020} reverse-engineered
+Voatz, the first internet-voting application used in U.S. federal
+elections and marketed on its use of a blockchain. They found flaws
+allowing an adversary to alter, stop or expose a voter's ballot, a
+side-channel through which a passive network observer could recover the
+secret ballot, and a dependence on third-party services with attendant
+privacy exposure; West Virginia and a Washington county withdrew the
+application from 2020 primaries following the analysis. The
+architectural point is the important one: the blockchain sat behind an
+application whose compromise made the ledger irrelevant, because votes
+were corrupted before they reached it.
+
+Park, Specter, Narula and Rivest~\cite{park2021} generalise these
+observations into a direct argument that blockchain voting is worse
+than internet voting rather than better. Their case is that blockchains
+address a problem elections do not have --- disagreement about which
+transactions occurred among mutually distrusting parties --- while
+introducing new failure modes, and that the genuinely hard problems of
+elections, namely software independence, secret ballots, voter
+authentication and client-side integrity, are untouched. They further
+note that a blockchain vote is a \emph{transparent} record, which is in
+tension with ballot secrecy rather than supportive of it.
+
+This dissertation adopts that critique as a premise to be tested
+quantitatively rather than as a conclusion to be restated. The
+experimental design deliberately grants the ledger everything its
+proponents claim --- integrity is verified continuously and, as the \emph{Findings} chapter reports, was never violated in any trial ---
+and then measures how many elections are stolen anyway.
+
+\subsection{Bribery and vote buying as a formal problem}
+\label{sec:lit-bribery}
+
+Three distinct traditions model vote buying, and this dissertation
+borrows from all three.
+
+\textbf{Computational.} Faliszewski, Hemaspaandra and
+Hemaspaandra~\cite{faliszewski2009} formalise bribery as a decision
+problem: given per-voter prices and a budget, can the briber make a
+preferred candidate win? They classify the complexity across voting
+rules, establishing that some systems make optimal bribery
+NP-hard --- complexity as a defensive barrier. The framing is
+worst-case, combinatorial and deterministic: a bribed voter votes as
+paid.
+
+\textbf{Economic.} Becker's analysis of crime as a decision under
+risk~\cite{becker1968} models an offender weighing gain against the
+probability of detection multiplied by the penalty, and derives the
+policy conclusion that deterrence can be achieved either by raising
+detection or by raising penalties. Equation~(\ref{eq:m1}) in this
+dissertation is exactly that calculation applied to a bribed voter, and
+the critical-detection threshold developed in this work is the
+policy question in Becker's sense: how much detection is enough?
+
+\textbf{Blockchain-specific.} Daian, Kell, Bentov and
+Juels~\cite{daian2018} describe on-chain vote buying and the
+\emph{Dark DAO}: a smart contract that pays for votes and enforces the
+payment trustlessly, using trusted execution to verify compliance
+without revealing the buyer. Their argument deserves emphasis in the
+present context because it inverts the usual claim. A blockchain does
+not merely fail to prevent vote buying; by making votes cryptographically
+attributable and payments programmable and escrowed, it \emph{improves}
+the market for votes, removing the counterparty risk that limits bribery
+in traditional settings. This is a technical-report and research-blog
+contribution rather than a peer-reviewed paper, and is cited as such,
+but it is widely referenced and directly motivates treating bribery,
+not tampering, as the primary threat to a ledger-based election.
+
+The gap across all three: the computational tradition treats bribery
+deterministically, the economic tradition treats the individual decision
+without an electorate-level outcome model, and the blockchain-specific
+work is a mechanism proposal rather than a quantified risk model. None
+produces the quantity a defender needs --- the probability that a given
+budget overturns a given margin against a given detection capability.
+
+\subsection{Sybil attacks and identity}
+\label{sec:lit-sybil}
+
+Douceur~\cite{douceur2002} established that, absent a trusted
+certification authority, a single entity in a distributed system can
+present arbitrarily many distinct identities, and that no purely local
+resource test reliably distinguishes them. For an election the
+consequence is immediate and fatal: one-person-one-vote is the entire
+premise, and a Sybil attack attacks the premise rather than the
+mechanism.
+
+Responses divide into those that reintroduce a trusted authority and
+those that attempt to establish uniqueness without one. Borge et
+al.~\cite{borge2017} propose proof-of-personhood, binding digital
+identities to physical presence at pseudonym parties, explicitly to
+recover one-per-person semantics in permissionless systems. The
+approach illustrates both the necessity and the difficulty: physical
+attendance is a strong Sybil barrier and an equally strong barrier to
+accessibility, which is what electronic voting exists to improve.
+
+This dissertation does not model any specific identity mechanism. It
+parameterises the outcome instead --- a forged registration passes with
+probability $q_s$ and is caught with probability $p_d$ --- which is
+weaker than assuming a trusted authority and is deliberately
+conservative. It also produces the finding, reported in the \emph{Findings} chapter, that identity verification rather than
+ledger integrity is where the residual risk concentrates, consistent
+with voter authentication being repeatedly flagged as an open problem in
+the systematic reviews~\cite{ohize2025,rahul2025}.
+
+\subsection{Ballot stuffing and statistical election forensics}
+\label{sec:lit-forensics}
+
+Ballot stuffing --- injecting fraudulent ballots not corresponding to
+any voter --- is the least cryptographically interesting of the three
+vectors and, historically, among the most common. The relevant
+literature is statistical rather than cryptographic.
+
+Klimek, Yegorov, Hanel and Thurner~\cite{klimek2012} show that
+systematic irregularities leave detectable signatures in the joint
+distribution of turnout and vote share across polling units: incremental
+stuffing and extreme fraud produce characteristic distortions absent
+from clean elections, and the authors identify these fingerprints in
+several national elections. The methodological lesson carried into this
+dissertation is that fraud is bounded by \emph{plausibility} as much as
+by opportunity. An attacker who injects ballots without limit produces a
+turnout figure that requires no probabilistic detection to notice. This
+is the justification for the capacity ceilings imposed in the coalition
+model (described in the methodology below), which are otherwise a
+modelling choice without grounding: they stand in for the anomaly
+detection that election forensics performs.
+
+\subsection{Probabilistic and game-theoretic security analysis}
+\label{sec:lit-probgame}
+
+The final strand supplies the analytical machinery.
+
+\textbf{Concentration inequalities.} Chernoff's
+bound~\cite{chernoff1952}, in the multiplicative form given by
+Mitzenmacher and Upfal~\cite{mitzenmacher2017}, bounds the probability
+that a sum of independent Bernoulli variables deviates from its mean,
+and does so exponentially in the deviation. For this dissertation its
+value is specific: it converts an empirical statement into a provable
+one. A margin certified safe by the bound is safe irrespective of how
+many simulation runs were performed, which is what makes the certified
+margin defined in this work a security claim rather than an
+observation.
+
+\textbf{Rational attackers.} Eyal and Sirer~\cite{eyal2014}
+demonstrated with selfish mining that a blockchain protocol assumed
+secure under an honest-majority model can be broken by a rational
+minority that deviates profitably --- security depending on incentives,
+not only on cryptography or on hash-power share. Liu et
+al.~\cite{liu2019} survey the resulting body of game-theoretic
+blockchain analysis, covering mining strategy, security games and
+incentive design.
+
+Two points transfer directly. First, the relevant question about an
+attacker is what they would \emph{choose} to do, not what they are
+capable of doing: the \emph{Findings} chapter shows that a
+budget-exhausting attacker performs strictly worse than a rational one,
+so a defence tuned against maximum expenditure is tuned against the
+wrong opponent. Second, deterrence is a legitimate security goal
+distinct from prevention --- making an attack unprofitable is cheaper
+than making it impossible, and the gap between those two thresholds is
+quantified in this dissertation.
+
+\subsection{Synthesis and research gap}
+\label{sec:lit-synthesis}
+
+\tabref{tab:gap} summarises what each strand supplies and what it
+leaves open.
+
+\begin{table}[htbp]
+\centering
+\caption{What the literature supplies, and what it leaves open.}
+\label{tab:gap}
+\small
+\begin{tabular}{@{}p{3.5cm}p{5.1cm}p{5.1cm}@{}}
+\toprule
+\textbf{Strand} & \textbf{Supplies} & \textbf{Leaves open} \\
+\midrule
+Blockchain voting proposals
+  \cite{mccorry2017,ohize2025,rahul2025}
+& Architectures, cryptographic protocols, throughput evaluation
+& No quantified success probability against a budgeted attacker \\
+\addlinespace
+Empirical critiques
+  \cite{springall2014,specter2020,park2021}
+& Evidence that deployments fail upstream of the ledger
+& Qualitative argument; no model of how much manipulation gets through \\
+\addlinespace
+Bribery theory
+  \cite{faliszewski2009,becker1968,daian2018}
+& Complexity classification; the rational-offender calculus; on-chain vote-buying mechanisms
+& Deterministic or individual-level; no electorate-scale outcome distribution \\
+\addlinespace
+Sybil and identity
+  \cite{douceur2002,borge2017}
+& Impossibility without trusted certification; countermeasure designs
+& No probabilistic model of partial identity verification \\
+\addlinespace
+Election forensics
+  \cite{klimek2012}
+& Statistical signatures of stuffing; plausibility as a real constraint
+& Detection after the fact, not a design threshold beforehand \\
+\addlinespace
+Probabilistic and game-theoretic tools
+  \cite{chernoff1952,mitzenmacher2017,eyal2014,liu2019}
+& Concentration bounds; rational-deviation analysis
+& Not yet applied to e-voting manipulation as an integrated model \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Three gaps follow, and they define the contribution of this
+dissertation.
+
+\textbf{Gap 1: no quantified attacker model for e-voting
+countermeasures.} The proposal literature evaluates systems on
+cryptographic properties and performance; the critical literature
+establishes qualitatively that deployments fail. Neither produces the
+probability that a specific budget overturns a specific margin against
+a specific detection capability. The \emph{Threat Model} and \emph{Findings} chapters supply exactly that, over
+\TotalTrials{} matched randomised trials per vector.
+
+\textbf{Gap 2: probabilities are reported where thresholds are
+needed.} A defender cannot act on a success-probability curve. The
+inverse question --- what detection probability, what budget ceiling,
+what margin makes this attack non-viable --- is not asked in the
+e-voting literature, although Becker's economics of
+deterrence~\cite{becker1968} and the game-theoretic blockchain
+work~\cite{eyal2014,liu2019} both imply it should be.
+The \emph{Critical Thresholds} chapter formulates seven such thresholds and solves them.
+
+\textbf{Gap 3: attack vectors are evaluated in isolation.} Every source
+reviewed treats bribery, Sybil attacks and ballot stuffing separately.
+No reviewed work models an attacker allocating one budget across
+several vectors simultaneously. The \emph{Coalition Attacks} chapter shows this omission is not conservative: two of the three vectors are individually
+infeasible in every benchmark scenario, yet their combination succeeds
+decisively in four of five.

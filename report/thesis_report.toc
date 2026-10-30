@@ -1,0 +1,85 @@
+\contentsline {section}{Abstract}{1}{Doc-Start}%
+\contentsline {section}{\numberline {1}Introduction}{6}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Motivation}{6}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Research questions}{6}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Contributions}{7}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Scope, and what this work is not}{7}{subsection.1.4}%
+\contentsline {section}{\numberline {2}Literature Review}{7}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Scope and method of the review}{7}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Electronic voting before blockchain}{8}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Blockchain-based voting proposals}{9}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}The critical response: what happens on deployment}{9}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Bribery and vote buying as a formal problem}{10}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}Sybil attacks and identity}{11}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.7}Ballot stuffing and statistical election forensics}{11}{subsection.2.7}%
+\contentsline {subsection}{\numberline {2.8}Probabilistic and game-theoretic security analysis}{11}{subsection.2.8}%
+\contentsline {subsection}{\numberline {2.9}Synthesis and research gap}{12}{subsection.2.9}%
+\contentsline {section}{\numberline {3}Threat model and mathematical framework}{13}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Threat model}{13}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Rational voter behaviour (M1--M2)}{13}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Attacker budget constraint (M3)}{14}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Outcome distributions and success probability (M4--M6, M9--M10, M12--M13)}{14}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Detection and survival (M11, M14)}{15}{subsection.3.5}%
+\contentsline {subsection}{\numberline {3.6}Chernoff bounds (M7--M8)}{15}{subsection.3.6}%
+\contentsline {subsection}{\numberline {3.7}The two forms are not interchangeable}{15}{subsection.3.7}%
+\contentsline {subsection}{\numberline {3.8}Two-sided certificate: closing the coverage gap}{16}{subsection.3.8}%
+\contentsline {subsection}{\numberline {3.9}Notation}{16}{subsection.3.9}%
+\contentsline {section}{\numberline {4}Critical thresholds and the rational attacker}{17}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Why invert the model}{17}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Voter-side thresholds}{17}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Effort and budget thresholds}{17}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Margin thresholds}{18}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Unified rational attacker across vectors}{18}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}Coalition attack}{19}{subsection.4.6}%
+\contentsline {section}{\numberline {5}Implementation}{19}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Architecture}{19}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Numerical care}{20}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Testing}{20}{subsection.5.3}%
+\contentsline {section}{\numberline {6}Research Design and Methodology}{20}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Research strategy: why simulation}{20}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}A two-layer architecture, and why both layers are necessary}{21}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Variables and operationalisation}{22}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.4}What the ledger contributes, and what it does not}{22}{subsection.6.4}%
+\contentsline {subsection}{\numberline {6.5}Parameter selection and its justification}{23}{subsection.6.5}%
+\contentsline {subsection}{\numberline {6.6}Paired randomised design}{24}{subsection.6.6}%
+\contentsline {subsection}{\numberline {6.7}Triangulation of three computational methods}{24}{subsection.6.7}%
+\contentsline {subsection}{\numberline {6.8}Threshold solver design}{25}{subsection.6.8}%
+\contentsline {subsection}{\numberline {6.9}Coalition search design}{25}{subsection.6.9}%
+\contentsline {subsection}{\numberline {6.10}Validation and verification}{26}{subsection.6.10}%
+\contentsline {subsection}{\numberline {6.11}Figure geometry on a discrete support}{26}{subsection.6.11}%
+\contentsline {subsection}{\numberline {6.12}Reproducibility protocol}{27}{subsection.6.12}%
+\contentsline {subsection}{\numberline {6.13}Ethical considerations}{27}{subsection.6.13}%
+\contentsline {section}{\numberline {7}The Experiment in Depth}{27}{section.7}%
+\contentsline {subsection}{\numberline {7.1}The five experiments}{29}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Anatomy of a single trial}{29}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Experiment 1: paired randomised trials}{31}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}Experiment 2: concrete mined elections}{31}{subsection.7.4}%
+\contentsline {subsection}{\numberline {7.5}Experiment 3: benchmark scenarios}{32}{subsection.7.5}%
+\contentsline {subsection}{\numberline {7.6}Experiment 4: threshold solving}{32}{subsection.7.6}%
+\contentsline {subsection}{\numberline {7.7}Experiment 5: coalition and sensitivity}{33}{subsection.7.7}%
+\contentsline {section}{\numberline {8}Findings}{33}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Overview}{33}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}F1 --- Budget and detection are not symmetric levers}{35}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}F2 --- The three methods agree, and each has a distinct use}{37}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}F3 --- Countermeasures work, but not uniformly}{39}{subsection.8.4}%
+\contentsline {subsection}{\numberline {8.5}F4 --- Chain integrity and election correctness are independent}{40}{subsection.8.5}%
+\contentsline {subsection}{\numberline {8.6}F5 --- Deterrence is far cheaper than prevention}{41}{subsection.8.6}%
+\contentsline {subsubsection}{\numberline {8.6.1}Break-even budget}{42}{subsubsection.8.6.1}%
+\contentsline {subsubsection}{\numberline {8.6.2}The contested band of margins}{42}{subsubsection.8.6.2}%
+\contentsline {subsubsection}{\numberline {8.6.3}The rational attacker does not spend everything}{43}{subsubsection.8.6.3}%
+\contentsline {subsection}{\numberline {8.7}F6 --- Combining vectors defeats what no single vector can}{44}{subsection.8.7}%
+\contentsline {subsubsection}{\numberline {8.7.1}No single vector suffices}{44}{subsubsection.8.7.1}%
+\contentsline {subsubsection}{\numberline {8.7.2}The mixed strategy}{46}{subsubsection.8.7.2}%
+\contentsline {subsubsection}{\numberline {8.7.3}Robustness of the coalition finding}{47}{subsubsection.8.7.3}%
+\contentsline {subsubsection}{\numberline {8.7.4}Countermeasures against the coalition}{47}{subsubsection.8.7.4}%
+\contentsline {subsection}{\numberline {8.8}Scale effects}{47}{subsection.8.8}%
+\contentsline {section}{\numberline {9}Discussion}{48}{section.9}%
+\contentsline {subsection}{\numberline {9.1}What the ledger does and does not buy}{48}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Deterrence is cheaper than prevention}{48}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}Single-vector analysis is not conservative}{49}{subsection.9.3}%
+\contentsline {subsection}{\numberline {9.4}Answers to the research questions}{49}{subsection.9.4}%
+\contentsline {section}{\numberline {10}Limitations and threats to validity}{50}{section.10}%
+\contentsline {section}{\numberline {11}Conclusion and future work}{50}{section.11}%
+\contentsline {section}{References}{52}{section.11}%
+\contentsline {section}{\numberline {A}Figure catalogue}{54}{appendix.A}%
+\contentsline {section}{\numberline {B}Reproducing these results}{54}{appendix.B}%

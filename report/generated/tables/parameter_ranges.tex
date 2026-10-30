@@ -1,0 +1,33 @@
+\begin{table}[htbp]
+\centering
+\caption{Randomised parameter ranges. Every trial draws one value per symbol uniformly from these ranges; the protected configuration modifies only the acceptance and detection probabilities, never $N$, $m$, $B$, $R$, $P$, $S$ or $A$.}
+\label{tab:parameters}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llr}
+\toprule
+Symbol & Meaning & Range \\
+\midrule
+$N$ & Electorate size & 200 -- 5{,}000 \\
+$m$ & Manipulation threshold & 2\% -- 25\% of $N$ \\
+$B$ & Attacker budget & 1{,}000 -- 200{,}000 \\
+$R$ & Bribe reward per voter & 10 -- 500 \\
+$P$ & Penalty if a bribed voter is caught & 10 -- 2{,}000 \\
+$q$ & Bribery detection probability (baseline) & 0.02 -- 0.25 \\
+$q$ & Bribery detection probability (protected) & baseline $+$ 0.15 -- 0.60 \\
+$S$ & Attempted forged identities & 10 -- 1{,}000 \\
+$q_s$ & Registration acceptance (baseline) & 0.40 -- 0.95 \\
+$p_d$ & Sybil detection (baseline) & 0.02 -- 0.30 \\
+$A$ & Attempted fraudulent ballots & 10 -- 1{,}000 \\
+$q_b$ & Ballot acceptance (baseline) & 0.30 -- 0.90 \\
+$p_b$ & Ballot detection (baseline) & 0.02 -- 0.30 \\
+$q_s$ & Registration acceptance (protected) & baseline $\times\,(1 -$ 0.30 -- 0.80$)$ \\
+$p_d$ & Sybil detection (protected) & baseline $+$ 0.20 -- 0.70 \\
+$q_b$ & Ballot acceptance (protected) & baseline $\times\,(1 -$ 0.30 -- 0.80$)$ \\
+$p_b$ & Ballot detection (protected) & baseline $+$ 0.20 -- 0.70 \\
+\bottomrule
+\end{tabular}%
+}
+\vspace{2pt}
+{\footnotesize\textit{Note.} Source: \texttt{config.py::PARAM\_RANGES}. Currency-like quantities are unitless in the model; only ratios such as $B/R$ affect the results.}
+\end{table}

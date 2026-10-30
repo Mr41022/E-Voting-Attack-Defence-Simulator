@@ -1,0 +1,14 @@
+Figure:
+appendix_chernoff_vs_exact
+
+What this graph shows:
+The graph places the exact probability value against the corresponding Chernoff upper bound for each attack vector.
+
+Main observation:
+The bound scatters above the diagonal, showing the intended conservative direction and confirming the code avoids presenting Chernoff as an exact calculation.
+
+Why it matters:
+It provides a direct audit view of the certificate logic used elsewhere in the study and clarifies where the bound is informative versus loose.
+
+Limitation:
+It does not quantify exactly how much slack remains in every scenario; that is a separate statistical question handled by the validation summaries.

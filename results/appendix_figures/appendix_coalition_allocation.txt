@@ -1,0 +1,14 @@
+Figure:
+appendix_coalition_allocation
+
+What this graph shows:
+The graph summarises how the optimal coalition uses the available budget across bribery, Sybil, and ballot stuffing.
+
+Main observation:
+The bars show an allocation pattern that is not purely single-vector, implying that the attack budget is distributed across the three capacities rather than concentrated in one line.
+
+Why it matters:
+It matters because it makes the coalition model visible and clarifies why the defence must be assessed against a joint attacker behaviour rather than a single attack type.
+
+Limitation:
+The figure does not prove that every scenario should have a positive coalition gain; the protected regime in the current dataset may produce a zero or non-positive utility outcome.

@@ -1,0 +1,26 @@
+{
+  "total_trials": 300,
+  "seed": 42,
+  "elapsed_seconds": 65.0418312549591,
+  "flip_rates": {
+    "bribery": {
+      "baseline_flip_rate": 0.44,
+      "protected_flip_rate": 0.013333333333333334,
+      "absolute_reduction": 0.4266666666666667,
+      "relative_reduction": 0.9696969696969697
+    },
+    "sybil": {
+      "baseline_flip_rate": 0.5466666666666666,
+      "protected_flip_rate": 0.11333333333333333,
+      "absolute_reduction": 0.4333333333333333,
+      "relative_reduction": 0.7926829268292682
+    },
+    "ballot_stuffing": {
+      "baseline_flip_rate": 0.55,
+      "protected_flip_rate": 0.08333333333333333,
+      "absolute_reduction": 0.46666666666666673,
+      "relative_reduction": 0.8484848484848485
+    }
+  },
+  "chain_integrity_never_violated": true
+}

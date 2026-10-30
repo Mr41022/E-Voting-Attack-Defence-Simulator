@@ -1,0 +1,1777 @@
+%=======================================================================
+%  Blockchain-Based Electronic Voting: Modelling and Experimental
+%  Evaluation of Bribery, Sybil and Ballot-Stuffing Attacks
+%
+%  Every numeric value in this document is injected from the
+%  experimental output by generate_report.py (generated/numbers.tex);
+%  no result is typed in by hand. Compile with:
+%      python generate_report.py
+%=======================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx}                      % Times text + math
+\usepackage[scaled=0.88]{helvet}           % Helvetica for headings
+\usepackage{amsmath,amssymb}
+\usepackage[margin=2.6cm,top=2.8cm,bottom=2.9cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{pdflscape}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[font=small,labelfont=bf,labelsep=period,justification=justified]{caption}
+\usepackage{tcolorbox}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+
+%--- palette (matches the figure palette in visualisation/style.py) ----
+\definecolor{accent}{HTML}{0072B2}
+\definecolor{warm}{HTML}{D55E00}
+\definecolor{inkmuted}{HTML}{4D4D4D}
+\definecolor{rule}{HTML}{BFBFBF}
+\definecolor{panel}{HTML}{F4F7FA}
+
+\hypersetup{colorlinks=true, linkcolor=accent, citecolor=accent,
+            urlcolor=accent, linktoc=all,
+            pdftitle={Blockchain-Based Electronic Voting: Modelling and
+                      Experimental Evaluation of Bribery, Sybil and
+                      Ballot-Stuffing Attacks},
+            pdfsubject={MSc Computing Science dissertation --- submission copy}}
+
+%--- headings ----------------------------------------------------------
+\titleformat{\section}{\normalfont\sffamily\large\bfseries\color{black}}
+            {\thesection}{0.8em}{}[\vspace{2pt}\color{rule}\hrule height 0.6pt]
+\titleformat{\subsection}{\normalfont\sffamily\normalsize\bfseries}{\thesubsection}{0.7em}{}
+\titleformat{\subsubsection}{\normalfont\sffamily\small\bfseries}{\thesubsubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{20pt}{10pt}
+\titlespacing*{\subsection}{0pt}{14pt}{6pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhead[L]{\footnotesize\sffamily\color{inkmuted}Blockchain-Based E-Voting: Attack Modelling and Evaluation}
+\fancyhead[R]{\footnotesize\sffamily\color{inkmuted}\thepage}
+
+\setlength{\parskip}{0.42em}
+\setlength{\parindent}{0pt}
+\onehalfspacing
+
+%--- callout box -------------------------------------------------------
+\newtcolorbox{finding}[1][]{colback=panel, colframe=accent, boxrule=0pt,
+  leftrule=2.6pt, arc=1pt, left=9pt, right=9pt, top=7pt, bottom=7pt,
+  fontupper=\normalsize, #1}
+
+\newtcolorbox{readbox}{colback=panel, colframe=accent, boxrule=0pt,
+  leftrule=2.6pt, arc=1pt, left=9pt, right=9pt, top=6pt, bottom=6pt,
+  fontupper=\small}
+
+\newcommand{\finhead}[1]{\textsf{\bfseries #1}\par\vspace{2pt}}
+
+%--- shorthands --------------------------------------------------------
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\Ex}{\mathbb{E}}
+\newcommand{\Bin}{\mathrm{Binomial}}
+\newcommand{\Uv}{U_{v}}
+\newcommand{\figref}[1]{Figure~\ref{#1}}
+\newcommand{\tabref}[1]{Table~\ref{#1}}
+\newcommand{\eqnref}[1]{Equation~(\ref{#1})}
+\newcommand{\code}[1]{\texttt{\small #1}}
+
+%--- generated numbers -------------------------------------------------
+\input{generated/numbers}
+\graphicspath{{../results/plots/}}
+
+\begin{document}
+
+\begin{titlepage}
+\thispagestyle{empty}
+\centering
+\vspace*{1.0cm}
+
+{\sffamily\Large University of Glasgow}\\[2pt]
+{\sffamily\normalsize School of Computing Science}\\[2.6cm]
+
+{\color{rule}\rule{\textwidth}{0.9pt}}\\[0.65cm]
+{\sffamily\LARGE\bfseries Blockchain-Based Electronic Voting}\\[0.40cm]
+{\sffamily\Large Mathematical Modelling and Experimental Evaluation of}\\[0.16cm]
+{\sffamily\Large Bribery, Sybil and Ballot-Stuffing Attacks}\\[0.65cm]
+{\color{rule}\rule{\textwidth}{0.9pt}}\\[1.1cm]
+
+{\large A game-theoretic and probabilistic security evaluation,}\\[3pt]
+{\large with exact binomial analysis, Chernoff bounds and}\\[3pt]
+{\large critical-threshold identification}\\[1.8cm]
+
+\begin{minipage}{0.8\textwidth}
+\centering\itshape
+Author, supervisor and submission date to be completed by the candidate.
+\end{minipage}
+
+\vspace{1.2cm}
+\begin{minipage}{0.86\textwidth}
+\centering\small
+This document contains the complete dissertation together with a full
+appendix of every figure and every result table produced by the
+simulation. All results are generated from the accompanying code
+(seed \Seed, \TotalTrials{} paired trials per vector) and are
+reproducible bit-for-bit; \TestCount{} automated tests pass and
+\code{check\_consistency.py} reports no drift between the text and the
+data it describes.
+\end{minipage}
+
+\vfill
+{\footnotesize\color{inkmuted}
+No real election system, voter record or personal datum is used anywhere in this work.}
+\end{titlepage}
+\clearpage
+
+
+%=======================================================================
+
+
+%=======================================================================
+\clearpage
+\section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
+
+Electronic voting systems built on blockchain ledgers are frequently claimed to be
+tamper-proof, but immutability of a recorded ballot is a different property from
+resistance to the manipulation that occurs \emph{before} a ballot is recorded. This
+dissertation asks a narrower and more answerable question: given a rational attacker
+with a finite budget, how likely is manipulation to change an election outcome, and
+what level of countermeasure is actually required to stop it?
+
+Three manipulation vectors are modelled probabilistically and game-theoretically ---
+bribery of genuine voters, Sybil registration of forged identities, and ballot
+stuffing. Each is expressed as a sequence of independent Bernoulli attempts whose
+outcome count follows a binomial distribution, with attack success defined as reaching
+a manipulation threshold $m$: exactly the number of fraudulent votes needed to overturn
+the election. Success probabilities are computed three ways --- exactly by the binomial
+survival function, empirically by Monte Carlo simulation, and analytically by a
+multiplicative Chernoff bound --- and the three are cross-validated against one another.
+
+The evaluation runs \TotalTrials{} paired randomised trials per vector, comparing a
+baseline configuration against a protected configuration in which a blockchain-backed
+audit ledger is combined with digital signatures, identity verification and ballot
+validation. It is those validation and detection controls, not the ledger, that raise
+detection and lower acceptance; the ledger contributes integrity, immutability and
+auditability, and the experiment is designed to keep the two contributions
+distinguishable. The same underlying scenario is used for both arms of each pair,
+so the comparison is a matched design rather than two independent samples. A concrete
+layer complements the statistics: \ElectionTrials{} elections are genuinely mined on a
+proof-of-work chain and attacked, so that abstract success probabilities are tied to
+actual winner flips.
+
+The protected configuration reduces mean success probability by \BriberyRelReduction\%
+for bribery, \SybilRelReduction\% for Sybil attacks and \BallotStuffingRelReduction\%
+for ballot stuffing, and reduces real winner-flip rates from \FlipBriberyBaseline\%,
+\FlipSybilBaseline\% and \FlipBallotStuffingBaseline\% to \FlipBriberyProtected\%,
+\FlipSybilProtected\% and \FlipBallotStuffingProtected\% respectively. Chain integrity
+was \ChainIntegrityHeld{} across all trials.
+
+Beyond these aggregate results the dissertation contributes two extensions. First, a
+set of \emph{critical-threshold solvers} inverts the model: rather than reporting how
+likely an attack is, they report the parameter value at which it stops being viable.
+The most consequential of these is the critical detection probability $q_d^*$, which
+lies between \CriticalDetectionMin{} and \CriticalDetectionMax{} across the
+\CriticalDetectionBindingCount{} of \CoalitionScenarioCount{} benchmark scenarios where
+detection is the binding constraint --- between four and eleven times weaker than the
+detection the protected configuration actually delivers, and in the fifth scenario the
+attack never pays at any detection level. Deterrence, on this model,
+is far cheaper than prevention. Second, a \emph{coalition} model allows one attacker
+to split a single budget across all three vectors at once. The exact distribution of
+the combined attack is obtained by convolution rather than approximation, and the
+mixed strategy strictly outperforms the best single-vector strategy in
+\CoalitionBetterCount{} of \CoalitionScenarioCount{} scenarios, raising mean success
+probability from \BestPureMeanBaseline{} to \CoalitionMeanBaseline{}. Single-vector
+security analysis therefore understates the risk, while the modelled countermeasures
+reduce the coalition attack to the same degree as they reduce each vector alone across
+the benchmark scenarios examined.
+
+\vspace{0.6em}
+\noindent\textbf{Keywords:} electronic voting, blockchain, bribery, Sybil attack,
+ballot stuffing, game theory, Chernoff bound, binomial analysis, security thresholds.
+
+%=======================================================================
+\clearpage
+\tableofcontents
+\clearpage
+\listoffigures
+\listoftables
+\clearpage
+
+%=======================================================================
+\section{Introduction}
+
+\subsection{Motivation}
+
+The appeal of a blockchain-backed ballot box is easy to state: once a vote is written
+to an append-only, hash-linked ledger and replicated across independent nodes, altering
+it after the fact is computationally infeasible and, more importantly, immediately
+visible. That property is real, and the implementation accompanying this dissertation
+demonstrates it directly --- a vote modified after mining is caught by chain validation,
+with the exact offending block index reported.
+
+The property is also narrower than it is usually made to sound. Immutability protects a
+vote \emph{after} it is recorded. It says nothing about whether the vote should have
+existed at all. A ballot cast by a voter who was paid to vote a particular way is
+recorded just as faithfully as an honest one; so is a ballot cast by a forged identity
+that passed registration, and so is a ballot injected by an attacker with system access.
+In each case the ledger is perfectly consistent and the election is still wrong. The
+security question that matters, then, is not whether the record can be altered, but how
+much manipulation an attacker can push through the front door, and what it costs them.
+
+That reframing makes the problem quantitative. An attacker has a budget, faces a per
+attempt cost, and succeeds only if enough fraudulent votes survive the system's
+defences to overturn the margin. Each of those quantities is a number, and the
+relationship between them is a probability distribution rather than a binary
+vulnerability. This dissertation takes that view seriously and works it through.
+
+\subsection{Research questions}
+
+\begin{enumerate}[label=\textbf{RQ\arabic*.},leftmargin=2.6em,itemsep=3pt]
+  \item How does the probability that an attack overturns an election outcome depend on
+        the attacker's budget, the per-attempt cost, and the system's detection
+        capability?
+  \item How accurately do a Monte Carlo estimate and a Chernoff upper bound reproduce
+        the exact binomial probability, and where does each remain useful at scale?
+  \item How much does the protected configuration --- a blockchain-backed
+        audit ledger \emph{combined with} digital signatures, identity
+        verification and ballot validation --- reduce attack success,
+        measured as a matched comparison on identical scenarios?
+  \item What is the \emph{minimum} countermeasure strength that makes each attack
+        non-viable, as opposed to merely less likely to succeed?
+  \item Does an attacker who combines all three vectors against a single budget
+        outperform one who commits to the best single vector, and does that change the
+        security conclusion?
+\end{enumerate}
+
+RQ1--RQ3 are the descriptive questions the base model answers. RQ4 and RQ5 are this
+dissertation's extensions and are, in the author's view, the more useful pair: a
+defender cannot act on a probability curve, but can act on a threshold.
+
+\subsection{Contributions}
+
+\begin{enumerate}[leftmargin=1.6em,itemsep=3pt]
+  \item A complete probabilistic model of three e-voting manipulation vectors
+        (Section~\ref{sec:model}), implemented with exact binomial computation,
+        Monte Carlo simulation and correctly-signed Chernoff bounds in both tails,
+        with each equation traceable to its implementing function.
+  \item A matched experimental evaluation over \TotalTrials{} paired randomised trials
+        per vector (Section~\ref{sec:findings}), reporting bootstrap confidence
+        intervals rather than point estimates alone.
+  \item A concrete validation layer in which \ElectionTrials{} elections are actually
+        mined on a proof-of-work chain and attacked, tying every abstract probability
+        to a real winner flip (Section~\ref{sec:findings-concrete}).
+  \item Seven \emph{critical-threshold solvers} (Section~\ref{sec:thresholds}) that
+        invert the model and return the parameter value at which an attack ceases to be
+        viable, including the break-even attacker budget and the critical detection
+        probability.
+  \item A \emph{coalition attack} model (Section~\ref{sec:coalition}) in which one
+        budget is split across all three vectors, with the combined distribution
+        evaluated exactly by convolution, plus a robustness sweep over
+        \SensitivityConfigs{} cost and capacity configurations.
+\end{enumerate}
+
+\subsection{Scope, and what this work is not}
+
+This is a simulation study with synthetic data. It models no real election, no real
+voter, and no real deployed system; the candidates are labelled \emph{A} and \emph{B}
+and have no referent. The blockchain component is a working but educational
+proof-of-work implementation, not a distributed consensus network with real nodes,
+network partitions or economic security. Countermeasures are modelled as probability
+parameters rather than as specific cryptographic constructions: the model says what
+happens if identity verification catches a forged registration with probability $p_d$,
+not how such verification is built.
+
+The work is also deliberately confined to manipulation of vote \emph{inputs}. Attacks on
+the consensus layer itself --- majority hash-power attacks, chain reorganisation, eclipse
+attacks --- are out of scope, as are coercion and receipt-freeness, which raise questions
+of ballot secrecy rather than of ballot count. Section~\ref{sec:limitations} returns to
+these boundaries and to what would be needed to cross them.
+
+%=======================================================================
+\input{sections/literature_review}
+
+\section{Threat model and mathematical framework}
+\label{sec:model}
+
+\subsection{Threat model}
+
+A single attacker attempts to change the outcome of a two-candidate election with $N$
+enrolled voters. Let the honest tally leave the attacker's preferred candidate behind by
+some margin; the \emph{manipulation threshold} $m$ is the number of additional
+fraudulent votes needed to overturn that margin, so that
+
+\begin{equation}
+m = (\text{opponent votes} - \text{target votes}) + 1 ,
+\label{eq:threshold}
+\end{equation}
+
+and the attack succeeds precisely when at least $m$ fraudulent votes survive every
+countermeasure and reach the final count. Throughout this dissertation, ``attack
+success'' means exactly this event and nothing weaker.
+
+Three vectors are available.
+
+\begin{description}[leftmargin=1.4em,style=nextline,itemsep=2pt]
+  \item[Bribery.] The attacker offers a reward $R$ to genuine voters, constrained by a
+    total budget $B$. A targeted voter accepts only if doing so is rationally
+    incentivised. Each bribed vote is detected, and therefore discarded, with
+    probability $q$.
+  \item[Sybil registration.] The attacker submits $S$ forged identities. Each passes
+    registration with probability $q_s$ and is independently detected afterwards with
+    probability $p_d$.
+  \item[Ballot stuffing.] The attacker injects $A$ fraudulent ballots. Each is accepted
+    with probability $q_b$ and independently detected with probability $p_b$.
+\end{description}
+
+Attempts within a vector are independent and identically distributed. This is a
+modelling assumption with real consequences, and Section~\ref{sec:limitations} examines
+what correlated behaviour would do to the results.
+
+\subsection{Rational voter behaviour (M1--M2)}
+
+A voter offered a bribe faces a decision under risk. Accepting yields $R$ if undetected
+and costs a penalty $P$ if detected, so expected utility is
+
+\begin{equation}
+\Uv = (1 - q) R - q P .
+\label{eq:m1}
+\end{equation}
+
+A risk-neutral voter accepts when $\Uv > 0$, which rearranges to the
+incentive-compatibility condition
+
+\begin{equation}
+R > \frac{qP}{1 - q}, \qquad q \neq 1 .
+\label{eq:m2}
+\end{equation}
+
+At $q = 1$ the right-hand side is undefined; the implementation returns no threshold
+rather than substituting a value, and falls back on \eqnref{eq:m1}, which remains
+well-defined and gives $\Uv = -P$.
+
+\eqnref{eq:m1} carries more weight in this model than its simplicity suggests. It is a
+\emph{gate}: if bribery is not incentive-compatible, no bribe is accepted, and the
+attack contributes zero fraudulent votes no matter how large the budget. This is why
+bribery behaves discontinuously in the results while the other two vectors degrade
+smoothly.
+
+\subsection{Attacker budget constraint (M3)}
+
+With reward $R$ per voter and budget $B$, the attacker can approach at most
+
+\begin{equation}
+T = \min\!\left(N, \left\lfloor \frac{B}{R} \right\rfloor\right)
+\label{eq:m3}
+\end{equation}
+
+voters --- limited either by money or by the size of the electorate. The cases $B = 0$,
+$R = 0$ and $B < R$ all yield $T = 0$ explicitly rather than an undefined division.
+
+\subsection{Outcome distributions and success probability (M4--M6, M9--M10, M12--M13)}
+
+Because attempts are independent Bernoulli trials, each vector's surviving-fraud count
+is binomial:
+
+\begin{align}
+X &\sim \Bin(T,\, 1 - q)          &&\text{bribery, surviving bribed votes} \label{eq:m4}\\
+Y &\sim \Bin(S,\, q_s)             &&\text{Sybil, accepted identities} \label{eq:m9}\\
+Z &\sim \Bin(A,\, q_b)             &&\text{ballot stuffing, accepted ballots} \label{eq:m12}
+\end{align}
+
+with attack success probability given in every case by the survival function
+
+\begin{equation}
+\Prob(X \geq m) = \sum_{k=m}^{n} \binom{n}{k} p^{k} (1-p)^{n-k},
+\qquad \Ex[X] = \mu = np .
+\label{eq:m5}
+\end{equation}
+
+This is computed exactly, via the regularised incomplete beta function underlying
+\code{scipy.stats.binom.sf}, and never by normal or Poisson approximation.
+
+\subsection{Detection and survival (M11, M14)}
+
+Detection applies independently to each fraudulent item, so the probability that all $n$
+escape, and its complement, are
+
+\begin{equation}
+\Prob(\text{all escape}) = (1 - p)^{n}, \qquad
+\Prob(\text{at least one caught}) = 1 - (1 - p)^{n} .
+\label{eq:m11}
+\end{equation}
+
+Both are evaluated in log space, via \code{log1p} and \code{expm1}, so that they remain
+accurate for the small $p$ and large $n$ combination where a naive implementation loses
+all significance.
+
+A forged identity or injected ballot must clear \emph{two} independent gates to count:
+acceptance and non-detection. Under independence the surviving count is therefore
+
+\begin{equation}
+W \sim \Bin\big(n,\; q_{\text{accept}}(1 - p_{\text{detect}})\big),
+\label{eq:survival}
+\end{equation}
+
+and it is $W$, not the raw acceptance count, that is compared against the threshold $m$
+throughout the results. The independence of the two gates is an assumption, flagged as
+such; a system whose detector preferentially re-examines items that only barely passed
+registration would violate it.
+
+\subsection{Chernoff bounds (M7--M8)}
+
+For $X$ a sum of independent Bernoulli variables with mean $\mu$, the multiplicative
+Chernoff bounds are
+
+\begin{align}
+\Prob\big(X \geq (1+\delta)\mu\big) &\leq
+  \exp\!\Big(\mu\big[\delta - (1+\delta)\ln(1+\delta)\big]\Big),
+  && \delta > 0 \label{eq:m7}\\[4pt]
+\Prob\big(X \leq (1-\delta)\mu\big) &\leq
+  \exp\!\left(\frac{-\mu\delta^{2}}{2}\right),
+  && 0 < \delta < 1 . \label{eq:m8}
+\end{align}
+
+Two implementation points deserve emphasis, because both are easy to get
+wrong and both are guarded by tests.
+
+The sign in \eqnref{eq:m8} is negative and is hard-coded as such. A positive
+exponent produces a ``bound'' exceeding $1$, which is vacuous as a probability
+statement while still looking plausible in output; a dedicated regression test
+asserts that the returned value never exceeds the correctly-signed expression
+and is strictly below the incorrectly-signed one.
+
+The bound is applied only where it is mathematically valid. Given $(n, p, m)$
+the implementation first determines whether $m$ lies in the upper tail
+($m > \mu$), the lower tail ($m < \mu$), or neither, and returns \emph{no
+bound}, with a machine-readable reason, outside those regions.
+
+\subsection{The two forms are not interchangeable}
+\label{sec:tailforms}
+
+Because it was raised in review, it is worth stating explicitly that the
+$(1+\delta)$ factor in \eqnref{eq:m7} cannot be replaced by $(1-\delta)$.
+The factor is not a stylistic choice: it records which side of the mean
+the threshold lies on. Substituting one for the other does not weaken or
+strengthen the bound, it falsifies it.
+
+Evaluating the (incorrect) claim
+$\Prob(X \geq (1-\delta)\mu) \leq [e^{-\delta}/(1-\delta)^{(1-\delta)}]^{\mu}$
+for $\delta \in \{0.05, 0.10, 0.20\}$ across four $(n,p)$ settings --- twelve
+cases --- the inequality fails in eleven of them, and fails by wide margins: at
+$n = 2000$, $p = 0.45$, $\delta = 0.20$ the true probability is $1.0000$
+against a claimed bound of $4.0 \times 10^{-9}$. The reason is structural.
+The threshold $(1-\delta)\mu$ lies \emph{below} the mean, so
+$\Prob(X \geq (1-\delta)\mu)$ approaches one, while the expression decays
+exponentially in $\mu$. The correctly-signed upper-tail form bounds every
+one of the same cases, and the $(1-\delta)$ form is valid on the tail it
+belongs to, $\Prob(X \leq (1-\delta)\mu)$. All three statements are
+regression-tested rather than merely asserted here.
+
+\subsection{Two-sided certificate: closing the coverage gap}
+\label{sec:certificate}
+
+The review point did, however, expose a real limitation. The dispatcher
+returns a bound only when $m > \mu$, which left every scenario with
+$m \leq \mu$ --- \LowerTailShareMin\% to \LowerTailShareMax\% of trials
+depending on the vector --- with no analytic statement at all. Those are not marginal cases:
+$m \leq \mu$ is precisely the regime in which the attack is \emph{likely
+to succeed}, and therefore the more alarming half of the parameter space.
+
+The remedy is to bound whichever tail the threshold actually falls in.
+Where $m > \mu$, the upper-tail form certifies the success probability
+from above. Where $m \leq \mu$, the failure event $X \leq m-1$ is itself
+a lower-tail event, so the $(1-\delta)$ form of \eqnref{eq:m8} bounds
+$\Prob(X \leq m-1)$ from above and thereby certifies success from
+\emph{below}:
+\begin{equation}
+\Prob(X \geq m) \;\geq\; 1 - \exp\!\left(\frac{-\mu\delta^{2}}{2}\right),
+\qquad \delta = 1 - \frac{m-1}{\mu} .
+\label{eq:certificate}
+\end{equation}
+
+Both are one-sided guarantees, and which one is available is a property
+of the scenario rather than a choice. The security readings differ
+usefully: an upper bound says the attack cannot succeed with probability
+greater than $B$, while a lower bound says it succeeds with probability
+at least $1-B$ --- the stronger claim to be able to make about an
+adversary.
+
+With the certificate in place every scenario carries a statement. Across
+all 15{,}000 scenario evaluations the certified interval contains the
+exact binomial value in 100\% of cases, with a mean interval width of
+\BriberyIntervalWidth{} for bribery, \SybilIntervalWidth{} for Sybil and
+\BallotStuffingIntervalWidth{} for ballot stuffing, and no scenario left
+uncovered. Figure~\ref{fig:twosided} validates both directions
+against the exact value.
+
+\subsection{Notation}
+
+This work uses $q$ for the \emph{detection} probability throughout, so that a bribed
+vote survives with probability $1-q$. Some presentations of the same model write $q$ for
+the success probability directly. The two are related by $q_{\text{alt}} = 1 - q$ and
+nothing in the mathematics changes; the detection convention is kept here because it
+composes directly with \eqnref{eq:m1}, where $q$ reads naturally as ``risk of being
+caught''.
+
+%=======================================================================
+\section{Critical thresholds and the rational attacker}
+\label{sec:thresholds}
+
+\subsection{Why invert the model}
+
+Sections above answer ``how likely is this attack to succeed?''. A defender designing a
+system needs the inverse: ``what would have to be true for this attack to stop being
+worth mounting?'' The answer to the first question is a curve; the answer to the second
+is a number, and a number can be turned into a requirement. The solvers below produce
+those numbers. Each returns \emph{no value}, with a reason, when the threshold does not
+exist in the searched domain --- a threshold that does not exist is reported as absent
+rather than as an endpoint.
+
+\subsection{Voter-side thresholds}
+
+The same indifference condition $\Uv = 0$ can be solved for either of its two free
+variables, giving a pair of thresholds that answer the attacker's question and the
+defender's question respectively. Solving for the reward gives the smallest bribe a
+rational voter accepts at a given detection probability:
+
+\begin{equation}
+R^{*} = \frac{qP}{1-q},
+\label{eq:t1}
+\end{equation}
+
+undefined at $q = 1$, where no finite reward is incentive-compatible while $P > 0$. This
+is the attacker's per-voter price, and it is what makes the budget constraint
+$T = \min(N, \lfloor B/R \rfloor)$ bite.
+
+Solving the same condition for $q$ instead gives the detection probability
+at which the targeted voter is exactly indifferent:
+
+\begin{equation}
+q_v^{*} = \frac{R}{R + P} .
+\label{eq:t2}
+\end{equation}
+
+This is the single most actionable quantity in the bribery model. It depends only on
+the ratio of reward to penalty --- not on the electorate size, not on the margin, not on
+the attacker's budget. Above $q_v^{*}$ a rational voter refuses, the attack collapses to
+$T = 0$, and no budget rescues it. \figref{fig:utility} shows the surface and the
+threshold together.
+
+\subsection{Effort and budget thresholds}
+
+The minimum effort needed for even odds of reaching the threshold,
+
+\begin{equation}
+T_{\min} = \min \{\, n : \Prob(X \geq m) \geq \alpha \,\},
+\label{eq:t3}
+\end{equation}
+
+is found by binary search, which is exact because $\Prob(X \geq m)$ is non-decreasing in
+$n$ for fixed $m$ and $p$.
+
+The economic thresholds require care about what ``the attacker's utility'' means. The
+attacker's expected utility from $T$ bribery attempts is
+
+\begin{equation}
+U(T) = \Prob(X \geq m)\, V \;-\; T R \;-\; \big[1 - (1-q)^{T}\big] D,
+\label{eq:utility}
+\end{equation}
+
+where $V$ is the payoff from flipping the outcome and $D$ the penalty incurred if the
+attack is noticed at all. A rational attacker may always decline, so $\max_{T \geq 0}
+U(T) \geq 0$ identically --- a quantity floored at zero cannot be solved for a zero
+crossing. The thresholds are therefore defined on the \emph{signed} payoff of actually
+attacking, $\max_{T \geq 1} U(T)$, which is negative precisely when attacking is a
+losing proposition. With that definition:
+
+\begin{align}
+B^{*} &= \min \{\, B : \max_{T \geq 1} U(T) > 0 \,\}
+  &&\text{break-even budget} \label{eq:t4}\\
+q_d^{*} &= \min \{\, q \in [0,1] : \max_{T \geq 1} U(T) \leq 0 \,\}
+  &&\text{critical detection probability} \label{eq:t5}
+\end{align}
+
+Both are located by bisection on a monotone function: the feasible set grows with $B$,
+while rising $q$ lowers the survival probability and raises the expected penalty
+simultaneously. By construction $q_d^{*} \leq q_v^{*}$, and the gap between them is the
+region in which deterrence depends on the attacker being rational rather than on the
+attack being impossible.
+
+\subsection{Margin thresholds}
+
+Two thresholds bracket the contested region of margins. The largest margin the attacker
+overturns at least at probability $\alpha$,
+
+\begin{equation}
+m_{\alpha} = \max \{\, m : \Prob(X \geq m) \geq \alpha \,\},
+\label{eq:t7}
+\end{equation}
+
+and the smallest margin the Chernoff bound certifies as safe at tolerance $\varepsilon$,
+
+\begin{equation}
+m_{\varepsilon} = \min \{\, m : \exp\!\big(\mu[\delta - (1+\delta)\ln(1+\delta)]\big)
+  \leq \varepsilon \,\}, \qquad \delta = \tfrac{m}{\mu} - 1 .
+\label{eq:t6}
+\end{equation}
+
+The distinction between them is the distinction between an empirical and a provable
+statement. $m_{\alpha}$ says what the attacker usually manages; $m_{\varepsilon}$ says
+what the attacker cannot manage except with probability at most $\varepsilon$,
+regardless of how the simulation happened to run. Margins between the two are precisely
+where the exact binomial calculation, rather than either heuristic, decides the outcome.
+\figref{fig:pmf} draws all three thresholds on a single distribution.
+
+\subsection{Unified rational attacker across vectors}
+\label{sec:unified}
+
+The three vectors share a structure --- independent attempts, a per-attempt cost, a
+survival probability, a detection probability, a capacity ceiling --- and can therefore
+be optimised through one interface. Writing $c$ for the unit cost and $p_{\text{surv}}$
+for the survival probability of a single attempt, the utility of $n$ attempts is
+
+\begin{equation}
+U(n) = \Prob(W \geq m)\, V \;-\; n c \;-\; \big[1 - (1-p_{\text{detect}})^{n}\big] D,
+\qquad W \sim \Bin(n, p_{\text{surv}}),
+\label{eq:g1}
+\end{equation}
+
+which specialises to \eqnref{eq:utility} for bribery, with the additional rational-voter
+gate of \eqnref{eq:m1} applied first. Sybil and ballot stuffing carry no such gate:
+there is no third party whose consent the attacker needs.
+
+\subsection{Coalition attack}
+\label{sec:coalition-model}
+
+Nothing forces an attacker to choose one vector. Splitting a single budget $B$ in shares
+$(w_1, w_2, w_3)$ across the three gives a total surviving-fraud count
+
+\begin{equation}
+W_{\text{total}} = W_{\text{bribery}} + W_{\text{Sybil}} + W_{\text{ballot}},
+\label{eq:g2}
+\end{equation}
+
+a sum of independent binomials with \emph{different} success probabilities --- which is
+not itself binomial, and has no closed form. It is evaluated here exactly, by convolving
+the three probability mass functions. The evaluation exploits one useful identity:
+since $\Prob(W \geq m) = 1 - \Prob(W \leq m-1)$, and no combination summing to at most
+$m-1$ can involve a component larger than $m-1$, truncating every component distribution
+at $m-1$ before convolving is exact rather than approximate. That keeps the transform
+length at $m$ rather than at the total attempt count, which is what makes national-scale
+margins tractable.
+
+The Chernoff bound applies to $W_{\text{total}}$ unchanged, because \eqnref{eq:m7} is
+stated for sums of independent Bernoulli variables of arbitrary and possibly unequal
+parameters; only the aggregate mean is needed.
+
+%=======================================================================
+\section{Implementation}
+
+\subsection{Architecture}
+
+The system has two complementary layers, and the separation is deliberate.
+
+The \textbf{concrete layer} is a working blockchain e-voting application: SHA-256 block
+hashing, proof-of-work mining with adjustable difficulty, chain validation, and a voting
+service with voter registration, role-based election administration, duplicate-vote
+prevention and result publication. It produces actual elections with actual winners, and
+demonstrates tamper detection directly --- a vote edited after mining is caught by chain
+validation, which reports the offending block index.
+
+The \textbf{abstract layer} is the statistical framework: exact binomial computation,
+Chernoff bounds, Monte Carlo simulation, the threshold solvers and the game-theoretic
+optimisers. It runs thousands of paired trials in seconds, which would be infeasible
+against genuinely mined chains.
+
+Each layer answers what the other cannot. The abstract layer provides statistical power;
+the concrete layer provides ground truth, confirming that its probabilities correspond
+to real winner flips rather than to an artefact of the abstraction. Where the two are
+compared (Section~\ref{sec:findings-concrete}) they agree in ordering and magnitude.
+
+\subsection{Numerical care}
+
+Several implementation decisions matter for correctness rather than for style, and are
+recorded here because a reader reproducing this work would otherwise have to rediscover
+them.
+
+Survival probabilities use $\log$-space evaluation, so $(1-p)^n$ is computed as
+$\exp(n \ln(1-p))$ via \code{log1p}, avoiding the catastrophic cancellation that a naive
+implementation suffers for small $p$ and large $n$. All randomness flows through a
+single seeded \code{numpy.random.Generator}; no global random state is used anywhere,
+which is what makes the bit-for-bit reproducibility claim in
+Section~\ref{sec:reproducibility} enforceable by test. Binomial parameters are clamped
+into valid ranges before use, so floating-point drift that pushes a probability to
+$1 + 10^{-17}$ cannot produce a domain error deep inside a library call. The coalition
+convolution switches to an FFT for long vectors and clips the result at zero, since the
+true coefficients are probabilities and any negative value is round-off.
+
+\subsection{Testing}
+
+The suite contains \TestCount{} tests. Beyond routine coverage, several encode properties that the
+mathematics requires and that a plausible-looking implementation can silently violate:
+that the lower-tail Chernoff bound carries a negative exponent; that the bound is never
+returned outside its region of validity; that $T = 0$ rather than a division error when
+$B = 0$, $R = 0$ or $B < R$; that identical seeds produce identical output and different
+seeds do not; that the exact convolution of the coalition distribution matches a
+200{,}000-draw Monte Carlo simulation of the same three binomials; that a mixed strategy
+is never worse than the best pure one, since the pure strategies are corners of the same
+simplex; and that each threshold solver's answer actually brackets the crossing it
+claims to find.
+
+%=======================================================================
+\input{sections/methodology}
+
+\input{generated/tables/parameter_ranges}
+
+\input{sections/experiment}
+
+\input{sections/findings}
+
+\section{Discussion}
+
+\subsection{What the ledger does and does not buy}
+
+The clearest result in this dissertation is also the least flattering to the technology
+it evaluates. Chain integrity held in every one of the \ElectionTrials{} concrete
+elections, and in \FlipBriberyBaseline\% of baseline bribery trials the attacker still
+changed the winner. Immutability and correctness are orthogonal properties. A ledger
+guarantees that what was recorded stays recorded; whether it should have been recorded
+is decided upstream, by identity verification, ballot validation and the incentives
+facing voters.
+
+This is not an argument against blockchain voting so much as an argument about where
+its security budget belongs. The largest measured residual risk under protection is Sybil
+registration (\SybilProtected{} mean success probability, roughly twice the protected
+bribery figure), which is exactly the vector the ledger does nothing about. Ballot
+stuffing is close behind at \BallotStuffingProtected{}, so the residual is better
+described as concentrated in the two vectors that bypass the voter rather than in
+identity verification alone.
+
+\subsection{Deterrence is cheaper than prevention}
+
+The threshold analysis produces the most actionable finding. Making an attack
+unprofitable requires between four and eleven times less detection capability than the
+modelled countermeasures deliver: detection probabilities of \CriticalDetectionMin{} to
+\CriticalDetectionMax{} suffice across the \CriticalDetectionBindingCount{} scenarios
+where detection is the binding constraint, against \ProtectedQ{} provided. In the fifth
+scenario the attack is unprofitable at every detection level, so no threshold exists. If detection is expensive and
+roughly linear in cost --- a reasonable assumption for audit sampling and identity
+checks --- then most of the spend is buying certainty rather than deterrence.
+
+Two caveats keep this from being a licence to under-invest. Deterrence assumes a
+rational attacker who computes expected utility and declines when it is negative; an
+attacker with non-monetary motives, or one who misjudges the detection rate, is not
+deterred by an unfavourable expectation. And $q_d^{*}$ depends on the payoff $V$ and
+penalty $D$, which are the least well-grounded parameters in the model. The
+qualitative conclusion --- deterrence thresholds sit well below prevention thresholds
+--- is robust; the specific numbers should be read as illustrative.
+
+\subsection{Single-vector analysis is not conservative}
+
+It is tempting to treat a per-vector evaluation as conservative, on the reasoning that
+each attack is assessed at full strength. The coalition results show this is backwards.
+Two of the three vectors have an expected yield below the threshold in every scenario,
+and combining them produced near-certain success in four of five. Single-vector analysis
+did find an attack: bribery was viable in \BestPureViableCount{} of the
+\CoalitionScenarioCount{} scenarios, with success probabilities from \BestPureMin{} to
+\BestPureMax{}. But it is the difference between a roughly one-in-three chance and a
+near-certainty that matters to a defender, and only the coalition analysis surfaces the
+latter.
+
+The generalisable point is that capacity ceilings, not success probabilities, are what
+compose badly. Each ceiling is a hard limit within its own vector and irrelevant across
+vectors, so an attacker who spreads effort escapes all three at once. Any security
+argument resting on ``the attacker cannot obtain enough of X'' should be checked against
+an attacker who does not need all of it from X.
+
+\subsection{Answers to the research questions}
+
+\begin{description}[leftmargin=1.2em,style=nextline,itemsep=4pt]
+\item[RQ1] Success probability rises with budget and falls with detection, but the two
+  are not symmetric. Budget effects are gradual and saturate at the capacity ceiling;
+  detection effects are sharp, with success collapsing over a narrow band of $q$ once
+  the mean falls below the threshold. Detection is the more efficient lever.
+\item[RQ2] Monte Carlo reproduced the exact probability to a mean absolute error of
+  \BriberyMCError{} for bribery (\SybilMCError{} and \BallotStuffingMCError{} for the
+  other two) and is the right tool where no closed form exists. The Chernoff bound never
+  failed but was loose, by a mean of \BriberyChernoffGap{} for bribery and
+  \SybilChernoffGap{} and \BallotStuffingChernoffGap{} for the others; its value is that
+  it \emph{proves} rather than estimates.
+\item[RQ3] The protected configuration reduced success probability by
+  \BriberyRelReduction\%, \SybilRelReduction\% and \BallotStuffingRelReduction\% for the
+  three vectors, and real winner-flip rates by up to \FlipBriberyRelReduction\%.
+  The two largest residuals are Sybil (\SybilProtected{}) and ballot stuffing
+  (\BallotStuffingProtected{}), both above the protected bribery figure of
+  \BriberyProtected{}; the largest is Sybil, the vector the ledger does nothing about.
+\item[RQ4] Critical detection thresholds lie between \CriticalDetectionMin{} and
+  \CriticalDetectionMax{} in the \CriticalDetectionBindingCount{} of
+  \CoalitionScenarioCount{} scenarios where detection is the binding constraint --- far
+  below what the modelled countermeasures deliver. In the remaining scenario the attack
+  never pays at any detection level.
+\item[RQ5] Yes. Mixed strategies strictly beat the best single vector in
+  \CoalitionBetterCount{} of \CoalitionScenarioCount{} scenarios, and the effect survives
+  a \SensitivityConfigs-configuration robustness sweep.
+\end{description}
+
+%=======================================================================
+\section{Limitations and threats to validity}
+\label{sec:limitations}
+
+\textbf{Independence.} Attempts are modelled as independent Bernoulli trials with
+constant per-scenario probabilities. Real manipulation is correlated: a briber who finds
+one willing voter in a community finds more, and a detection mechanism that catches one
+forged registration often catches the batch. Positive correlation increases the variance
+of the outcome count without changing its mean, which fattens both tails --- so the
+model likely understates both the best and worst cases. The direction of the effect on
+$\Prob(X \geq m)$ depends on which side of the mean the threshold sits, which is
+precisely the contested-band question of Section~\ref{sec:thresholds-results}.
+
+\textbf{Homogeneous voters.} All voters facing the same $(q, R, P)$ reach the same
+decision, so the acceptance gate is binary at the population level. Real electorates are
+heterogeneous, and a distribution over reservation prices would replace the sharp gate
+with a smooth response curve. This is the single most consequential simplification in
+the bribery model and the most obvious extension.
+
+\textbf{Parameter grounding.} The probabilities, the payoff $V$, the penalty $D$ and the
+relative costs of the three vectors are plausible but not empirically calibrated. No
+public dataset gives the probability that a forged voter registration is detected. The
+sensitivity sweep addresses this for the coalition result; the threshold values should
+be read as illustrative of magnitude, not as measurements.
+
+\textbf{The blockchain is educational.} The implementation mines real proof-of-work
+blocks and detects real tampering, but it is a single-process chain. It has no peer-to-peer
+network, no fork resolution, no economic security and no adversarial nodes.
+Consensus-layer attacks are consequently out of scope entirely.
+
+\textbf{Countermeasures as probabilities.} Modelling identity verification as
+``catches a forgery with probability $p_d$'' says nothing about how to achieve any
+particular $p_d$, and real mechanisms fail in correlated, adversarially-chosen ways
+rather than independently at a fixed rate.
+
+\textbf{Scope.} Coercion, receipt-freeness, client-side malware, denial of service and
+consensus attacks are all excluded. A coerced voter differs from a bribed one in a way
+this model cannot express: the utility calculation of \eqnref{eq:m1} assumes the voter
+may decline.
+
+%=======================================================================
+\section{Conclusion and future work}
+
+This dissertation modelled three e-voting manipulation vectors probabilistically and
+game-theoretically, evaluated them over \TotalTrials{} matched randomised trials and
+\ElectionTrials{} genuinely mined elections, and inverted the model to find the
+parameter values at which each attack ceases to be viable.
+
+The measured effect of the protected configuration is substantial --- relative
+reductions of \BriberyRelReduction\%, \SybilRelReduction\% and
+\BallotStuffingRelReduction\% in success probability, and up to
+\FlipBriberyRelReduction\% in real winner-flip rate. But the two findings that seem most
+worth carrying forward are the ones the aggregate numbers obscure. Attacks stop being
+worth mounting at detection probabilities between \CriticalDetectionMin{} and
+\CriticalDetectionMax{} in the \CriticalDetectionBindingCount{} scenarios where detection
+binds --- between four and eleven times below what a fully protected system provides ---
+so deterrence is much cheaper than prevention. And an attacker who splits one budget
+across all three vectors beats the best single-vector attacker in
+\CoalitionBetterCount{} of \CoalitionScenarioCount{} scenarios, turning a roughly
+one-in-three chance into a near-certainty --- so evaluating vectors independently is not
+the conservative choice it appears to be.
+
+Underneath both sits the observation that motivated the work. Chain integrity was
+\ChainIntegrityHeld{} in any trial, and elections were stolen anyway. The ledger
+faithfully recorded fraudulent votes as fraudulent votes, permanently and verifiably.
+Whatever blockchain-based voting is for, it is not for this.
+
+\subsection*{Future work}
+
+Four extensions follow directly. Replacing the homogeneous voter with a distribution
+over reservation prices would turn the acceptance gate into a response curve and is the
+most natural next step. Introducing correlation between attempts, via a beta-binomial or
+an explicit contagion model, would test the independence assumption that the current
+tails depend on. Extending the coalition framework to a defender who allocates a
+detection budget across vectors would turn the analysis into a two-player game with a
+computable equilibrium, of which the present work computes only the attacker's best
+response. Finally, calibrating any of the probabilities against real electoral-fraud
+audit data would convert the illustrative threshold values into a usable defensive
+specification.
+
+%=======================================================================
+\clearpage
+\addcontentsline{toc}{section}{References}
+\begin{thebibliography}{99}
+
+\bibitem{adida2008} B.~Adida. Helios: Web-based Open-Audit Voting. In
+\emph{Proceedings of the 17th USENIX Security Symposium}, pp.~335--348, 2008.
+
+\bibitem{becker1968} G.~S.~Becker. Crime and Punishment: An Economic Approach.
+\emph{Journal of Political Economy}, 76(2):169--217, 1968.
+
+\bibitem{benaloh1994} J.~Benaloh and D.~Tuinstra. Receipt-Free Secret-Ballot
+Elections (Extended Abstract). In \emph{Proceedings of the 26th Annual ACM
+Symposium on Theory of Computing (STOC)}, pp.~544--553, 1994.
+
+\bibitem{borge2017} M.~Borge, E.~Kokoris-Kogias, P.~Jovanovic, L.~Gasser,
+N.~Gailly and B.~Ford. Proof-of-Personhood: Redemocratizing Permissionless
+Cryptocurrencies. In \emph{IEEE European Symposium on Security and Privacy
+Workshops (EuroS\&PW)}, pp.~23--26, 2017.
+
+\bibitem{chernoff1952} H.~Chernoff. A Measure of Asymptotic Efficiency for Tests
+of a Hypothesis Based on the Sum of Observations. \emph{Annals of Mathematical
+Statistics}, 23(4):493--507, 1952.
+
+\bibitem{daian2018} P.~Daian, T.~Kell, I.~Bentov and A.~Juels. On-Chain Vote
+Buying and the Rise of Dark DAOs. \emph{Hacking, Distributed} (IC3 technical
+report), July 2018. Available at
+\url{https://hackingdistributed.com/2018/07/02/on-chain-vote-buying/}.
+\emph{Cited as a technical report; not peer reviewed.}
+
+\bibitem{douceur2002} J.~R.~Douceur. The Sybil Attack. In \emph{Proceedings of
+the 1st International Workshop on Peer-to-Peer Systems (IPTPS)}, LNCS 2429,
+pp.~251--260, 2002.
+
+\bibitem{eyal2014} I.~Eyal and E.~G.~Sirer. Majority Is Not Enough: Bitcoin
+Mining Is Vulnerable. In \emph{Financial Cryptography and Data Security (FC)},
+LNCS 8437, pp.~436--454, 2014.
+
+\bibitem{faliszewski2009} P.~Faliszewski, E.~Hemaspaandra and
+L.~A.~Hemaspaandra. How Hard Is Bribery in Elections? \emph{Journal of
+Artificial Intelligence Research}, 35:485--532, 2009.
+
+\bibitem{juels2005} A.~Juels, D.~Catalano and M.~Jakobsson. Coercion-Resistant
+Electronic Elections. In \emph{Proceedings of the 2005 ACM Workshop on Privacy
+in the Electronic Society (WPES)}, pp.~61--70, 2005.
+
+\bibitem{klimek2012} P.~Klimek, Y.~Yegorov, R.~Hanel and S.~Thurner.
+Statistical Detection of Systematic Election Irregularities. \emph{Proceedings
+of the National Academy of Sciences}, 109(41):16469--16473, 2012.
+
+\bibitem{liu2019} Z.~Liu, N.~C.~Luong, W.~Wang, D.~Niyato, P.~Wang,
+Y.-C.~Liang and D.~I.~Kim. A Survey on Applications of Game Theory in
+Blockchain. \emph{arXiv preprint} arXiv:1902.10865, 2019.
+
+\bibitem{mccorry2017} P.~McCorry, S.~F.~Shahandashti and F.~Hao. A Smart
+Contract for Boardroom Voting with Maximum Voter Privacy. In \emph{Financial
+Cryptography and Data Security (FC)}, LNCS 10322, pp.~357--375, 2017.
+
+\bibitem{mitzenmacher2017} M.~Mitzenmacher and E.~Upfal. \emph{Probability and
+Computing: Randomization and Probabilistic Techniques in Algorithms and Data
+Analysis}. 2nd ed., Cambridge University Press, 2017.
+
+\bibitem{nakamoto2008} S.~Nakamoto. \emph{Bitcoin: A Peer-to-Peer Electronic
+Cash System}. 2008.
+
+\bibitem{ohize2025} H.~O.~Ohize, A.~J.~Onumanyi, B.~U.~Umar, L.~A.~Ajao,
+R.~O.~Isah, E.~M.~Dogo, B.~K.~Nuhu, O.~M.~Olaniyi, J.~G.~Ambafi, V.~B.~Sheidu
+and M.~M.~Ibrahim. Blockchain for Securing Electronic Voting Systems: A Survey
+of Architectures, Trends, Solutions, and Challenges. \emph{Cluster Computing},
+28, 2025. DOI 10.1007/s10586-024-04709-8.
+
+\bibitem{park2021} S.~Park, M.~Specter, N.~Narula and R.~L.~Rivest. Going from
+Bad to Worse: From Internet Voting to Blockchain Voting. \emph{Journal of
+Cybersecurity}, 7(1):tyaa025, 2021.
+
+\bibitem{rahul2025} Rahul, P.~Gulia and N.~S.~Gill. Articulation of Blockchain
+Enabled E-Voting Systems: A Systematic Literature Review. \emph{Peer-to-Peer
+Networking and Applications}, 18:142, 2025. DOI 10.1007/s12083-025-01956-3.
+
+\bibitem{specter2020} M.~A.~Specter, J.~Koppel and D.~Weitzner. The Ballot is
+Busted Before the Blockchain: A Security Analysis of Voatz, the First Internet
+Voting Application Used in U.S. Federal Elections. In \emph{Proceedings of the
+29th USENIX Security Symposium}, pp.~1535--1553, 2020.
+
+\bibitem{springall2014} D.~Springall, T.~Finkenauer, Z.~Durumeric, J.~Kitcat,
+H.~Hursti, M.~MacAlpine and J.~A.~Halderman. Security Analysis of the Estonian
+Internet Voting System. In \emph{Proceedings of the 2014 ACM SIGSAC Conference
+on Computer and Communications Security (CCS)}, pp.~703--715, 2014.
+
+\end{thebibliography}
+
+%=======================================================================
+\clearpage
+\appendix
+\section{Figure catalogue}
+
+The dissertation uses \FigureCount{} figures. The set is deliberately
+small: an earlier draft generated thirty, of which several were
+variations on a single point, and the important figures were diluted by
+the rest. Each of the ten below carries a distinct step of the argument,
+and none can be removed without losing a claim the dissertation makes.
+
+Figure numbers match the generated filenames --- \code{fig\_07\_*} is
+Figure 7 --- and \code{check\_consistency.py} fails the build if the two
+ever drift apart. Every figure is produced by \code{generate\_figures.py}
+from the experimental output at 320\,DPI raster and vector PDF, and
+carries a machine-generated caption in
+\code{results/FIGURE\_CAPTIONS.md}; none is drawn by hand.
+
+\begin{center}
+\small
+\begin{tabular}{@{}rp{6.3cm}p{5.6cm}@{}}
+\toprule
+\textbf{Fig.} & \textbf{Subject} & \textbf{Carries} \\
+\midrule
+1  & Method comparison: exact, Monte Carlo and Chernoff against detection probability
+   & Cross-validation of the three methods; the detection collapse (RQ1, RQ2) \\
+\addlinespace
+2  & Rational voter utility surface and decision threshold
+   & The consent gate that stops bribery independently of detection \\
+\addlinespace
+3  & Two-sided Chernoff certificate, both directions validated
+   & That every scenario carries a proved guarantee (RQ2) \\
+\addlinespace
+4  & Three-attack comparison, baseline against protected
+   & The headline countermeasure effect, and where residual risk sits (RQ3) \\
+\addlinespace
+5  & Election outcome flip rate on mined chains
+   & That integrity and correctness are independent properties \\
+\addlinespace
+6  & Critical detection threshold $q_d^{*}$
+   & How much detection is actually required (RQ4) \\
+\addlinespace
+7  & Binomial distribution with the three margin thresholds
+   & What ``attack success'' means, and the contested band \\
+\addlinespace
+8  & Game-theoretic optimal attacker strategy
+   & That a rational attacker stops short of spending everything (RQ1) \\
+\addlinespace
+9  & Vector capacity against the manipulation threshold
+   & Why no single vector suffices on its own \\
+\addlinespace
+10 & Coalition against best single-vector attack
+   & That mixing vectors beats committing to one (RQ5) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The analyses that earlier drafts illustrated with additional figures ---
+the budget sweep, the feasibility surface, the electorate-size sweep, the
+break-even budget, the contested-margin band, the coalition simplex and
+the cost-sensitivity sweep --- all still run, and their outputs remain in
+\code{results/csv/}. Only the figures were removed; no result was.
+
+\section{Reproducing these results}
+
+\begin{enumerate}[leftmargin=1.8em,itemsep=2pt]
+\item \code{pip install -r requirements.txt}
+\item \code{python run\_experiments.py --trials \TotalTrials{} --seed \Seed} \hfill
+      randomised paired trials
+\item \code{python run\_election\_attacks.py --trials \ElectionTrials{} --seed \Seed}
+      \hfill concrete mined elections
+\item \code{python run\_threshold\_analysis.py} \hfill thresholds and coalition
+\item \code{python generate\_figures.py} \hfill all \FigureCount{} figures and captions
+\item \code{python generate\_tables.py} \hfill CSV and \LaTeX{} tables
+\item \code{python generate\_report.py} \hfill the dissertation
+\item \code{python build\_compendium.py} \hfill the figures-and-results compendium
+\item \code{python build\_submission.py} \hfill this document (dissertation + appendix)
+\item \code{python check\_consistency.py} \hfill text-versus-data drift check
+\item \code{pytest -q} \hfill \TestCount{} tests
+\end{enumerate}
+
+Every \emph{experimental result} printed in this report is injected at build time from
+\code{results/json/} and \code{results/csv/} by \code{generate\_report.py} rather than
+typed. The exceptions are deliberate and are not results: configuration values quoted
+from \code{config.py}, the worked example's arithmetic shown at reduced precision so that
+it reads on the page, and the analytic counter-examples of
+Section~\ref{sec:tailforms}, which are computed and regression-tested in
+\code{tests/test\_chernoff.py}. Re-running the pipeline with seed \Seed{} reproduces this
+document exactly, and \code{check\_consistency.py} fails the build if a stated count,
+figure number or macro drifts from what the project actually contains.
+
+
+\clearpage
+\section{Complete figures and result tables}
+\label{app:compendium}
+
+This appendix reproduces every figure in the dissertation at full size,
+each with a short note on how to read it, followed by the complete
+tabular output of the simulation --- all fourteen result tables exactly
+as written by the pipeline to \code{results/csv/}.
+
+The figures appear twice by design. In the body they are sized to sit
+inside the argument that uses them; here they are given a page each, so
+that individual values, thresholds and annotations can be read directly
+off the axes. Nothing in this appendix is retyped: the figures are the
+same vector PDFs, and the tables are read from the result files.
+
+
+
+
+\clearpage
+
+\section*{Part I. Figures}
+\addcontentsline{toc}{section}{Part I. Figures}
+
+Each figure below is the one that appears in the dissertation, at full size,
+with its caption unchanged. The shaded note beneath each states what the
+figure is for and which threshold values are marked on it.
+\vspace{6pt}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.97\textwidth]{fig_01_method_comparison.pdf}
+\caption[Exact, Monte Carlo and Chernoff comparison]{Exact binomial,
+Monte Carlo and Chernoff bound against detection probability on one
+fixed scenario. Averaging these three quantities across heterogeneous
+randomised trials would compare them on different sub-populations ---
+the bound exists only where $m > \mu$ --- so this figure varies only
+$q$.}
+\end{figure}
+\begin{readbox}\textsf{\bfseries How to read it.} Three independent methods on one scenario. The exact binomial curve and the Monte Carlo markers coincide throughout; the Chernoff curve sits above both wherever it is defined, which is the validity check. Where the bound disappears, $m \leq \mu$ and the one-sided upper tail does not apply. $R$ and $P$ are chosen so the collapse sits to the LEFT of $q_v^*$, i.e. inside the region where a rational voter would still accept the bribe.\end{readbox}
+\clearpage
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.97\textwidth]{fig_02_voter_utility_threshold.pdf}
+\caption[Voter utility surface and decision threshold]{Rational voter
+utility $\Uv = (1-q)R - qP$, with the $\Uv = 0$ decision boundary and
+the closed-form indifference threshold $q_v^{*} = R/(R+P)$ drawn
+together.}
+\end{figure}
+\begin{readbox}\textsf{\bfseries How to read it.} The rational-voter gate. A voter accepts a bribe only while $U_v = (1-q)R - qP$ stays positive; the crossing at $q_v^* = R/(R+P)$ is the point beyond which no budget buys a vote, because the voter --- not the system --- refuses.\end{readbox}
+\clearpage
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig_03_chernoff_two_sided.pdf}
+\caption[Two-sided Chernoff certificate]{Both Chernoff directions
+validated. Left: threshold above the mean, where the $(1+\delta)$
+upper-tail form certifies success from above --- valid points lie on or
+above the diagonal. Right: threshold below the mean, where the
+$(1-\delta)$ lower-tail form applied to the failure event certifies
+success from below --- valid points lie on or below it. No point falls
+on the wrong side of either diagonal.}
+\end{figure}
+\begin{readbox}\textsf{\bfseries How to read it.} The two-sided Chernoff certificate. Every scenario now carries an analytic guarantee: an upper bound where $m > \mu$, and a lower bound obtained by applying the lower tail to the failure event where $m \leq \mu$. The exact value lies inside the certified interval in 100\% of evaluations.\end{readbox}
+\clearpage
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.97\textwidth]{fig_04_attack_comparison.pdf}
+\caption[Three-attack comparison]{Mean success probability for the
+three vectors, baseline against protected.}
+\end{figure}
+\begin{readbox}\textsf{\bfseries How to read it.} The headline comparison. Baseline against protected, per vector, on identical paired trials. The gap between the two bars is the countermeasure effect; the error bars are bootstrap intervals, used because the underlying distributions are bimodal rather than normal. Note that the protected bars are reduced, not zero: attack success is substantially lowered under the modelled countermeasures, not eliminated.\end{readbox}
+\clearpage
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.97\textwidth]{fig_05_election_flip_rate.pdf}
+\caption[Election outcome flip rate]{Probability that an attack flips
+the winner of a concrete, blockchain-recorded election.}
+\end{figure}
+\begin{readbox}\textsf{\bfseries How to read it.} The concrete layer. Abstract success probability is one thing; the rate at which a mined election actually changes winner is another. This figure shows the two agree in magnitude, in the size of the protection effect, and in placing bribery lowest. They do not agree on the ordering of the top two: Sybil leads in the analytic layer and ballot stuffing here, by a third of a percentage point --- inside sampling error, so those two are best read as indistinguishable rather than ranked.\end{readbox}
+\clearpage
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.97\textwidth]{fig_06_critical_detection.pdf}
+\caption[Critical detection threshold]{Expected utility of attacking as
+detection rises, for the medium-organisation scenario. Two thresholds
+are marked: $q_d^{*}$, where the attack stops paying, and $q_v^{*}$,
+where voters refuse outright.}
+\end{figure}
+\begin{readbox}\textsf{\bfseries How to read it.} The defender's design target. $q_d^*$ is where attacking stops paying --- the attacker still can, but no longer wants to. $q_v^*$ is where voters refuse outright. The gap between them is the region where deterrence relies on the attacker being rational. The protected configuration's much higher operating point is a deliberately generous margin in the model, not a level the analysis finds necessary --- far less detection would already deter.\end{readbox}
+\clearpage
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.97\textwidth]{fig_07_binomial_thresholds.pdf}
+\caption[Binomial distribution with margin thresholds]{The binomial
+outcome distribution with its mean, the manipulation threshold, the
+attacker-reachable margin and the Chernoff-certified safe margin all
+marked.}
+\end{figure}
+\begin{readbox}\textsf{\bfseries How to read it.} The distribution behind every other figure, with all three margin thresholds drawn on it. Region boundaries sit at half-integers because $X$ is integer-valued, so each line meets the edge of a bar rather than cutting through its centre.\end{readbox}
+\clearpage
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.97\textwidth]{fig_08_optimal_attacker.pdf}
+\caption[Optimal attacker strategy]{Expected attacker utility (top) and
+flip probability (bottom) against bribery attempts, with the
+utility-maximising $T^{*}$ and the even-odds effort threshold
+$T_{\min}$ marked.}
+\end{figure}
+\begin{readbox}\textsf{\bfseries How to read it.} The attacker's optimisation. Utility against number of attempts, with the optimum marked. Effort beyond the optimum lowers utility, which is why a budget-constrained attacker does not simply spend everything.\end{readbox}
+\clearpage
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.97\textwidth]{fig_09_vector_capacity.pdf}
+\caption[Vector capacity against the threshold]{\emph{Expected}
+capacity of each vector at full effort, as a multiple of the
+manipulation threshold. A bar below the line means the mean falls
+short, not that the threshold is unreachable --- the annotated $P$ is
+the exact success probability at full effort. The diamond is the
+optimal split of a single budget across all three vectors, which is
+budget-feasible.}
+\end{figure}
+\begin{readbox}\textsf{\bfseries How to read it.} Why a rational attacker declines a vector. Each bar is capacity as a multiple of the threshold $m$, so the threshold is the line at 1.0. It is an EXPECTED value, not a ceiling: a bar below the line means the mean falls short, and the annotated $P$ gives the exact success probability at full effort --- 0.42 at a ratio of 0.97, and numerically zero below about 0.7. The diamond is the optimal split of one budget across all three vectors, which is budget-feasible.\end{readbox}
+\clearpage
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.97\textwidth]{fig_10_coalition_vs_pure.pdf}
+\caption[Coalition against best single vector]{Best coalition attack
+against best single-vector attack per scenario, with protected
+coalition results overlaid.}
+\end{figure}
+\begin{readbox}\textsf{\bfseries How to read it.} The coalition result. The best mixed-vector attack against the best single vector, per scenario. Protected markers sit at zero across these benchmark scenarios under these parameter settings --- a statement about those scenarios, not a general impossibility result, since the wider randomised trials retain a non-zero residual. Read the coalition analysis as an extension to the core baseline-versus-protected result, not as its centre.\end{readbox}
+\clearpage
+
+\section*{Part II. Result Tables}
+\addcontentsline{toc}{section}{Part II. Result Tables}
+
+The complete tabular output of the simulation, read directly from
+\code{results/csv/}. Column names are as emitted by the pipeline.
+
+\begin{readbox}
+\textsf{\bfseries Which probability each table reports.} Sybil and ballot
+stuffing pass fraudulent votes through \emph{two} independent gates, so they
+have two success probabilities. $P(\text{accepted} \geq m)$ counts votes that
+clear the \emph{acceptance} gate only --- an intermediate quantity that ignores
+detection and is therefore always larger. $P(\text{surviving} \geq m)$ counts
+votes that clear \emph{both} gates, and is the headline measure used in
+Tables~7--9, Figure~4 and every stated conclusion. Bribery has one effective
+gate (detection is folded into $1-q$), so its two measures coincide.
+Tables~3 and~4 report both, labelled by a \code{measure} column; Tables~5 and
+7--9 report the headline measure only, so the numbers agree across them.
+\end{readbox}
+\vspace{6pt}
+\subsection*{Table 1. Parameter ranges used in the randomised trials}
+\addcontentsline{toc}{subsection}{Table 1. Parameter ranges used in the randomised trials}
+{\small
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{lll}
+\toprule
+parameter & low & high \\
+\midrule
+\endfirsthead
+\toprule
+parameter & low & high \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{Continued on next page} \\
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+N & 200.0000 & 5000.0000 \\
+m\_fraction & 0.0200 & 0.2500 \\
+B & 1000.0000 & 200000.0000 \\
+R & 10.0000 & 500.0000 \\
+P & 10.0000 & 2000.0000 \\
+q\_baseline & 0.0200 & 0.2500 \\
+q\_protected\_boost & 0.1500 & 0.6000 \\
+S & 10.0000 & 1000.0000 \\
+qs\_baseline & 0.4000 & 0.9500 \\
+qs\_protected\_reduction & 0.3000 & 0.8000 \\
+pd\_baseline & 0.0200 & 0.3000 \\
+pd\_protected\_boost & 0.2000 & 0.7000 \\
+A & 10.0000 & 1000.0000 \\
+qb\_baseline & 0.3000 & 0.9000 \\
+qb\_protected\_reduction & 0.3000 & 0.8000 \\
+pb\_baseline & 0.0200 & 0.3000 \\
+pb\_protected\_boost & 0.2000 & 0.7000 \\
+\end{longtable}
+
+}
+\vspace{8pt}
+\subsection*{Table 2. Bribery attack --- success probability (single gate: detection is folded into $1-q$)}
+\addcontentsline{toc}{subsection}{Table 2. Bribery attack --- success probability (single gate: detection is folded into $1-q$)}
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{llllllll}
+\toprule
+attack & measure & system & mean & median & std & min & max \\
+\midrule
+\endfirsthead
+\toprule
+attack & measure & system & mean & median & std & min & max \\
+\midrule
+\endhead
+\midrule
+\multicolumn{8}{r}{Continued on next page} \\
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+bribery & single\_gate & baseline & 0.3501 & 0.0000 & 0.4743 & 0.0000 & 1.0000 \\
+bribery & single\_gate & protected & 0.0635 & 0.0000 & 0.2421 & 0.0000 & 1.0000 \\
+\end{longtable}
+
+}
+\vspace{8pt}
+\subsection*{Table 3. Sybil attack --- both measures: surviving (headline) and accepted-only}
+\addcontentsline{toc}{subsection}{Table 3. Sybil attack --- both measures: surviving (headline) and accepted-only}
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{llllllll}
+\toprule
+attack & measure & system & mean & median & std & min & max \\
+\midrule
+\endfirsthead
+\toprule
+attack & measure & system & mean & median & std & min & max \\
+\midrule
+\endhead
+\midrule
+\multicolumn{8}{r}{Continued on next page} \\
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+sybil & surviving\_ge\_m & baseline & 0.4804 & 0.0593 & 0.4923 & 0.0000 & 1.0000 \\
+sybil & surviving\_ge\_m & protected & 0.1356 & 0.0000 & 0.3292 & 0.0000 & 1.0000 \\
+sybil & accepted\_ge\_m & baseline & 0.5366 & 0.9993 & 0.4931 & 0.0000 & 1.0000 \\
+sybil & accepted\_ge\_m & protected & 0.2991 & 0.0000 & 0.4486 & 0.0000 & 1.0000 \\
+\end{longtable}
+
+}
+\vspace{8pt}
+\subsection*{Table 4. Ballot stuffing --- both measures: surviving (headline) and accepted-only}
+\addcontentsline{toc}{subsection}{Table 4. Ballot stuffing --- both measures: surviving (headline) and accepted-only}
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{llllllll}
+\toprule
+attack & measure & system & mean & median & std & min & max \\
+\midrule
+\endfirsthead
+\toprule
+attack & measure & system & mean & median & std & min & max \\
+\midrule
+\endhead
+\midrule
+\multicolumn{8}{r}{Continued on next page} \\
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+ballot\_stuffing & surviving\_ge\_m & baseline & 0.4416 & 0.0000 & 0.4871 & 0.0000 & 1.0000 \\
+ballot\_stuffing & surviving\_ge\_m & protected & 0.1162 & 0.0000 & 0.3098 & 0.0000 & 1.0000 \\
+ballot\_stuffing & accepted\_ge\_m & baseline & 0.4979 & 0.4834 & 0.4926 & 0.0000 & 1.0000 \\
+ballot\_stuffing & accepted\_ge\_m & protected & 0.2535 & 0.0000 & 0.4239 & 0.0000 & 1.0000 \\
+\end{longtable}
+
+}
+\vspace{8pt}
+\subsection*{Table 5. Baseline versus protected --- headline measure only (agrees with Tables 7--9)}
+\addcontentsline{toc}{subsection}{Table 5. Baseline versus protected --- headline measure only (agrees with Tables 7--9)}
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{llllllll}
+\toprule
+attack & measure & system & mean & median & std & min & max \\
+\midrule
+\endfirsthead
+\toprule
+attack & measure & system & mean & median & std & min & max \\
+\midrule
+\endhead
+\midrule
+\multicolumn{8}{r}{Continued on next page} \\
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+bribery & single\_gate & baseline & 0.3501 & 0.0000 & 0.4743 & 0.0000 & 1.0000 \\
+bribery & single\_gate & protected & 0.0635 & 0.0000 & 0.2421 & 0.0000 & 1.0000 \\
+sybil & surviving\_ge\_m & baseline & 0.4804 & 0.0593 & 0.4923 & 0.0000 & 1.0000 \\
+sybil & surviving\_ge\_m & protected & 0.1356 & 0.0000 & 0.3292 & 0.0000 & 1.0000 \\
+ballot\_stuffing & surviving\_ge\_m & baseline & 0.4416 & 0.0000 & 0.4871 & 0.0000 & 1.0000 \\
+ballot\_stuffing & surviving\_ge\_m & protected & 0.1162 & 0.0000 & 0.3098 & 0.0000 & 1.0000 \\
+\end{longtable}
+
+}
+\vspace{8pt}
+\subsection*{Table 6. Chernoff bound validation statistics}
+\addcontentsline{toc}{subsection}{Table 6. Chernoff bound validation statistics}
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{llllll}
+\toprule
+n valid & mean conservativeness & min conservativeness & max conservativeness & pct bound holds & attack \\
+\midrule
+\endfirsthead
+\toprule
+n valid & mean conservativeness & min conservativeness & max conservativeness & pct bound holds & attack \\
+\midrule
+\endhead
+\midrule
+\multicolumn{6}{r}{Continued on next page} \\
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+1088 & 0.0423 & 0.0000 & 0.8896 & 100.0000 & bribery \\
+3471 & 0.0260 & 0.0000 & 0.7550 & 100.0000 & sybil \\
+3604 & 0.0216 & 0.0000 & 0.7360 & 100.0000 & ballot\_stuffing \\
+\end{longtable}
+
+}
+\vspace{8pt}
+\begin{landscape}
+\subsection*{Table 7. Statistical analysis of the paired design}
+\addcontentsline{toc}{subsection}{Table 7. Statistical analysis of the paired design}
+{\tiny
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{llllllllll}
+\toprule
+mean baseline & mean protected & absolute reduction & relative reduction & mean paired reduction & paired reduction std & bootstrap boot mean & bootstrap ci low & bootstrap ci high & attack type \\
+\midrule
+\endfirsthead
+\toprule
+mean baseline & mean protected & absolute reduction & relative reduction & mean paired reduction & paired reduction std & bootstrap boot mean & bootstrap ci low & bootstrap ci high & attack type \\
+\midrule
+\endhead
+\midrule
+\multicolumn{10}{r}{Continued on next page} \\
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+0.3501 & 0.0635 & 0.2866 & 0.8186 & 0.2866 & 0.4483 & 0.2864 & 0.2689 & 0.3041 & bribery \\
+0.4804 & 0.1356 & 0.3448 & 0.7178 & 0.3448 & 0.4580 & 0.3445 & 0.3268 & 0.3622 & sybil \\
+0.4416 & 0.1162 & 0.3255 & 0.7370 & 0.3255 & 0.4510 & 0.3256 & 0.3084 & 0.3432 & ballot\_stuffing \\
+\end{longtable}
+
+}
+\end{landscape}
+\subsection*{Table 8. Countermeasure effectiveness (absolute and relative reduction)}
+\addcontentsline{toc}{subsection}{Table 8. Countermeasure effectiveness (absolute and relative reduction)}
+{\small
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{lllll}
+\toprule
+attack type & mean baseline & mean protected & absolute reduction & relative reduction \\
+\midrule
+\endfirsthead
+\toprule
+attack type & mean baseline & mean protected & absolute reduction & relative reduction \\
+\midrule
+\endhead
+\midrule
+\multicolumn{5}{r}{Continued on next page} \\
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+bribery & 0.3501 & 0.0635 & 0.2866 & 0.8186 \\
+sybil & 0.4804 & 0.1356 & 0.3448 & 0.7178 \\
+ballot\_stuffing & 0.4416 & 0.1162 & 0.3255 & 0.7370 \\
+\end{longtable}
+
+}
+\vspace{8pt}
+\subsection*{Table 9. Overall attack comparison across the three vectors}
+\addcontentsline{toc}{subsection}{Table 9. Overall attack comparison across the three vectors}
+{\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{llllll}
+\toprule
+attack & mean baseline success & mean protected success & relative reduction pct & mc mean abs error & chernoff pct holds \\
+\midrule
+\endfirsthead
+\toprule
+attack & mean baseline success & mean protected success & relative reduction pct & mc mean abs error & chernoff pct holds \\
+\midrule
+\endhead
+\midrule
+\multicolumn{6}{r}{Continued on next page} \\
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+bribery & 0.3501 & 0.0635 & 81.8589 & 0.0001 & 100.0000 \\
+sybil & 0.4804 & 0.1356 & 71.7790 & 0.0004 & 100.0000 \\
+ballot\_stuffing & 0.4416 & 0.1162 & 73.6953 & 0.0004 & 100.0000 \\
+\end{longtable}
+
+}
+\vspace{8pt}
+\begin{landscape}
+\subsection*{Table 10. Sample scenarios with the manipulation threshold $m$}
+\addcontentsline{toc}{subsection}{Table 10. Sample scenarios with the manipulation threshold $m$}
+{\tiny
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{llllllllll}
+\toprule
+trial id & N & m & B & R & P & q & system type & exact probability & attack success exact \\
+\midrule
+\endfirsthead
+\toprule
+trial id & N & m & B & R & P & q & system type & exact probability & attack success exact \\
+\midrule
+\endhead
+\midrule
+\multicolumn{10}{r}{Continued on next page} \\
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+1 & 2266 & 275 & 122751.5049 & 257.4784 & 1479.1157 & 0.0842 & baseline & 1.0000 & True \\
+1 & 2266 & 275 & 122751.5049 & 257.4784 & 1479.1157 & 0.2615 & protected & 0.0000 & False \\
+2 & 4853 & 600 & 122396.0345 & 457.0915 & 1175.7973 & 0.1742 & baseline & 0.0000 & False \\
+2 & 4853 & 600 & 122396.0345 & 457.0915 & 1175.7973 & 0.6655 & protected & 0.0000 & False \\
+3 & 2832 & 325 & 48399.9988 & 339.8336 & 617.3681 & 0.1135 & baseline & 0.0000 & False \\
+3 & 2832 & 325 & 48399.9988 & 339.8336 & 617.3681 & 0.3816 & protected & 0.0000 & False \\
+4 & 2185 & 170 & 54426.8507 & 80.3503 & 1612.2060 & 0.0301 & baseline & 1.0000 & True \\
+4 & 2185 & 170 & 54426.8507 & 80.3503 & 1612.2060 & 0.2908 & protected & 0.0000 & False \\
+5 & 1339 & 28 & 32524.0897 & 268.5447 & 987.8435 & 0.1716 & baseline & 1.0000 & True \\
+5 & 1339 & 28 & 32524.0897 & 268.5447 & 987.8435 & 0.4312 & protected & 0.0000 & False \\
+6 & 4602 & 366 & 93406.3314 & 261.9435 & 1659.2226 & 0.2452 & baseline & 0.0000 & False \\
+6 & 4602 & 366 & 93406.3314 & 261.9435 & 1659.2226 & 0.3740 & protected & 0.0000 & False \\
+7 & 1215 & 176 & 53865.9070 & 342.5107 & 1767.2102 & 0.1220 & baseline & 0.0000 & False \\
+7 & 1215 & 176 & 53865.9070 & 342.5107 & 1767.2102 & 0.5104 & protected & 0.0000 & False \\
+8 & 301 & 42 & 16428.4483 & 497.2649 & 1961.4240 & 0.0719 & baseline & 0.0000 & False \\
+8 & 301 & 42 & 16428.4483 & 497.2649 & 1961.4240 & 0.2514 & protected & 0.0000 & False \\
+9 & 945 & 197 & 171607.6095 & 200.9098 & 417.8600 & 0.0833 & baseline & 1.0000 & True \\
+9 & 945 & 197 & 171607.6095 & 200.9098 & 417.8600 & 0.3743 & protected & 0.0000 & False \\
+10 & 3174 & 308 & 18530.7135 & 403.8856 & 1403.6775 & 0.2330 & baseline & 0.0000 & False \\
+10 & 3174 & 308 & 18530.7135 & 403.8856 & 1403.6775 & 0.3850 & protected & 0.0000 & False \\
+11 & 3779 & 710 & 98080.1864 & 64.3038 & 1942.2510 & 0.0745 & baseline & 0.0000 & False \\
+11 & 3779 & 710 & 98080.1864 & 64.3038 & 1942.2510 & 0.2938 & protected & 0.0000 & False \\
+12 & 4311 & 956 & 37465.0252 & 82.2381 & 131.7993 & 0.1598 & baseline & 0.0000 & False \\
+12 & 4311 & 956 & 37465.0252 & 82.2381 & 131.7993 & 0.5154 & protected & 0.0000 & False \\
+13 & 1855 & 287 & 181786.9165 & 89.5474 & 862.7410 & 0.1241 & baseline & 0.0000 & False \\
+13 & 1855 & 287 & 181786.9165 & 89.5474 & 862.7410 & 0.3897 & protected & 0.0000 & False \\
+14 & 3885 & 393 & 25016.9646 & 154.7345 & 476.1860 & 0.2479 & baseline & 0.0000 & False \\
+14 & 3885 & 393 & 25016.9646 & 154.7345 & 476.1860 & 0.4073 & protected & 0.0000 & False \\
+15 & 4092 & 973 & 55194.9407 & 206.1441 & 1075.9624 & 0.1898 & baseline & 0.0000 & False \\
+15 & 4092 & 973 & 55194.9407 & 206.1441 & 1075.9624 & 0.3552 & protected & 0.0000 & False \\
+\end{longtable}
+
+}
+\end{landscape}
+\begin{landscape}
+\subsection*{Table 11. Critical thresholds T1--T7 per benchmark scenario}
+\addcontentsline{toc}{subsection}{Table 11. Critical thresholds T1--T7 per benchmark scenario}
+{\tiny
+\setlength{\tabcolsep}{3pt}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{llllllllllllllllllllll}
+\toprule
+scenario id & name & system type & N & m & B & R & P & q & R star & q voter indifference & voter accepts & T feasible & T star & T min for even odds & B star & q defender critical & mu & m reachable & m certified & exact p flip & utility star \\
+\midrule
+S1 & Small university election (100 voters) & baseline & 100 & 35 & 3000 & 80 & 600 & 0.0800 & 52.1739 & 0.1176 & True & 37 & 37 & 38.0000 & 2880.0000 & 0.1176 & 34.0400 & 34.0000 & NaN & 0.4231 & 21471.9356 \\
+S1 & Small university election (100 voters) & protected & 100 & 35 & 3000 & 80 & 600 & 0.5500 & 733.3333 & 0.1176 & False & 37 & 0 & 77.0000 & NaN & 0.1176 & 16.6500 & 17.0000 & 34.0000 & 0.0000 & 0.0000 \\
+S2 & Medium organisation election (10,000 voters) & baseline & 10000 & 1943 & 250000 & 120 & 900 & 0.0700 & 67.7419 & 0.1176 & True & 2083 & 2083 & 2089.0000 & 249480.0002 & 0.0722 & 1937.1900 & 1937.0000 & NaN & 0.3277 & 255503.1621 \\
+S2 & Medium organisation election (10,000 voters) & protected & 10000 & 1943 & 250000 & 120 & 900 & 0.5500 & 1100.0000 & 0.1176 & False & 2083 & 0 & 4317.0000 & NaN & 0.0722 & 937.3500 & 937.0000 & 1054.0000 & 0.0000 & 0.0000 \\
+S3 & Large national-scale election (100,000 voters) & baseline & 100000 & 19015 & 3000000 & 150 & 1200 & 0.0500 & 63.1579 & 0.1111 & True & 20000 & 20000 & 20016.0000 & 2998649.9998 & 0.0504 & 19000.0000 & 19000.0000 & 19515.0000 & 0.3204 & 1907536.0062 \\
+S3 & Large national-scale election (100,000 voters) & protected & 100000 & 19015 & 3000000 & 150 & 1200 & 0.5500 & 1466.6667 & 0.1111 & False & 20000 & 0 & 42255.0000 & NaN & 0.0504 & 9000.0000 & 9000.0000 & NaN & 0.0000 & 0.0000 \\
+S4 & High-budget attack (maximum attacker capability) & baseline & 5000 & 4758 & 5000000 & 100 & 500 & 0.0500 & 26.3158 & 0.1667 & True & 5000 & 5000 & 5008.0000 & 499400.0004 & 0.0514 & 4750.0000 & 4750.0000 & NaN & 0.3159 & 679480.1805 \\
+S4 & High-budget attack (maximum attacker capability) & protected & 5000 & 4758 & 5000000 & 100 & 500 & 0.5500 & 611.1111 & 0.1667 & False & 5000 & 0 & 10573.0000 & NaN & 0.0514 & 2250.0000 & 2250.0000 & NaN & 0.0000 & 0.0000 \\
+S5 & Low-budget attack (expected to fail) & baseline & 5000 & 550 & 8000 & 100 & 500 & 0.0500 & 26.3158 & 0.1667 & True & 80 & 0 & 579.0000 & 57100.0004 & 0.0000 & 76.0000 & 76.0000 & NaN & 0.0000 & 0.0000 \\
+S5 & Low-budget attack (expected to fail) & protected & 5000 & 550 & 8000 & 100 & 500 & 0.5500 & 611.1111 & 0.1667 & False & 80 & 0 & 1222.0000 & NaN & 0.0000 & 36.0000 & 36.0000 & 61.0000 & 0.0000 & 0.0000 \\
+\bottomrule
+\end{tabular}
+}
+}
+\end{landscape}
+\begin{landscape}
+\subsection*{Table 12. Optimal attacker effort per vector (G1)}
+\addcontentsline{toc}{subsection}{Table 12. Optimal attacker effort per vector (G1)}
+{\tiny
+\setlength{\tabcolsep}{3pt}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lllllllllllllll}
+\toprule
+scenario id & name & system type & vector & unit cost & p survive & p detect & m & n feasible & n star & p success at star & cost at star & utility star & viable & gate open \\
+\midrule
+S1 & Small university election (100 voters) & baseline & bribery & 80.0000 & 0.9200 & 0.0800 & 35 & 37 & 37 & 0.4231 & 2960.0000 & 21471.9356 & True & True \\
+S1 & Small university election (100 voters) & baseline & sybil & 32.0000 & 0.7200 & 0.1000 & 35 & 20 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S1 & Small university election (100 voters) & baseline & ballot\_stuffing & 12.0000 & 0.6300 & 0.1000 & 35 & 30 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S1 & Small university election (100 voters) & protected & bribery & 80.0000 & 0.4500 & 0.5500 & 35 & 37 & 0 & 0.0000 & 0.0000 & 0.0000 & False & False \\
+S1 & Small university election (100 voters) & protected & sybil & 32.0000 & 0.1125 & 0.5500 & 35 & 20 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S1 & Small university election (100 voters) & protected & ballot\_stuffing & 12.0000 & 0.0900 & 0.5500 & 35 & 30 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S2 & Medium organisation election (10,000 voters) & baseline & bribery & 120.0000 & 0.9300 & 0.0700 & 1943 & 2083 & 2083 & 0.3277 & 249960.0000 & 255503.1621 & True & True \\
+S2 & Medium organisation election (10,000 voters) & baseline & sybil & 48.0000 & 0.7200 & 0.1000 & 1943 & 2000 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S2 & Medium organisation election (10,000 voters) & baseline & ballot\_stuffing & 18.0000 & 0.6300 & 0.1000 & 1943 & 3000 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S2 & Medium organisation election (10,000 voters) & protected & bribery & 120.0000 & 0.4500 & 0.5500 & 1943 & 2083 & 0 & 0.0000 & 0.0000 & 0.0000 & False & False \\
+S2 & Medium organisation election (10,000 voters) & protected & sybil & 48.0000 & 0.1125 & 0.5500 & 1943 & 2000 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S2 & Medium organisation election (10,000 voters) & protected & ballot\_stuffing & 18.0000 & 0.0900 & 0.5500 & 1943 & 3000 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S3 & Large national-scale election (100,000 voters) & baseline & bribery & 150.0000 & 0.9500 & 0.0500 & 19015 & 20000 & 20000 & 0.3204 & 3000000.0000 & 1907536.0062 & True & True \\
+S3 & Large national-scale election (100,000 voters) & baseline & sybil & 60.0000 & 0.7200 & 0.1000 & 19015 & 20000 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S3 & Large national-scale election (100,000 voters) & baseline & ballot\_stuffing & 22.5000 & 0.6300 & 0.1000 & 19015 & 30000 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S3 & Large national-scale election (100,000 voters) & protected & bribery & 150.0000 & 0.4500 & 0.5500 & 19015 & 20000 & 0 & 0.0000 & 0.0000 & 0.0000 & False & False \\
+S3 & Large national-scale election (100,000 voters) & protected & sybil & 60.0000 & 0.1125 & 0.5500 & 19015 & 20000 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S3 & Large national-scale election (100,000 voters) & protected & ballot\_stuffing & 22.5000 & 0.0900 & 0.5500 & 19015 & 30000 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S4 & High-budget attack (maximum attacker capability) & baseline & bribery & 100.0000 & 0.9500 & 0.0500 & 4758 & 5000 & 5000 & 0.3159 & 500000.0000 & 679480.1805 & True & True \\
+S4 & High-budget attack (maximum attacker capability) & baseline & sybil & 40.0000 & 0.7200 & 0.1000 & 4758 & 1000 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S4 & High-budget attack (maximum attacker capability) & baseline & ballot\_stuffing & 15.0000 & 0.6300 & 0.1000 & 4758 & 1500 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S4 & High-budget attack (maximum attacker capability) & protected & bribery & 100.0000 & 0.4500 & 0.5500 & 4758 & 5000 & 0 & 0.0000 & 0.0000 & 0.0000 & False & False \\
+S4 & High-budget attack (maximum attacker capability) & protected & sybil & 40.0000 & 0.1125 & 0.5500 & 4758 & 1000 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S4 & High-budget attack (maximum attacker capability) & protected & ballot\_stuffing & 15.0000 & 0.0900 & 0.5500 & 4758 & 1500 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S5 & Low-budget attack (expected to fail) & baseline & bribery & 100.0000 & 0.9500 & 0.0500 & 550 & 80 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S5 & Low-budget attack (expected to fail) & baseline & sybil & 40.0000 & 0.7200 & 0.1000 & 550 & 200 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S5 & Low-budget attack (expected to fail) & baseline & ballot\_stuffing & 15.0000 & 0.6300 & 0.1000 & 550 & 533 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S5 & Low-budget attack (expected to fail) & protected & bribery & 100.0000 & 0.4500 & 0.5500 & 550 & 80 & 0 & 0.0000 & 0.0000 & 0.0000 & False & False \\
+S5 & Low-budget attack (expected to fail) & protected & sybil & 40.0000 & 0.1125 & 0.5500 & 550 & 200 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+S5 & Low-budget attack (expected to fail) & protected & ballot\_stuffing & 15.0000 & 0.0900 & 0.5500 & 550 & 533 & 0 & 0.0000 & 0.0000 & 0.0000 & False & True \\
+\bottomrule
+\end{tabular}
+}
+}
+\end{landscape}
+\begin{landscape}
+\subsection*{Table 13. Coalition attack versus best single vector (G2)}
+\addcontentsline{toc}{subsection}{Table 13. Coalition attack versus best single vector (G2)}
+{\tiny
+\setlength{\tabcolsep}{3pt}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lllllllllllllllllllll}
+\toprule
+scenario id & name & system type & m & B & share bribery & share sybil & share ballot stuffing & n bribery & n sybil & n ballot stuffing & mu total & coalition exact p & coalition chernoff & coalition p noticed & coalition utility & best pure vector & best pure exact p & best pure utility & coalition gain p & coalition gain utility \\
+\midrule
+S1 & Small university election (100 voters) & baseline & 35 & 3000 & 0.3500 & 0.2500 & 0.4000 & 13 & 20 & 30 & 45.2600 & 0.9987 & NaN & 0.9983 & 56881.5449 & bribery & 0.4231 & 21471.9356 & 0.5756 & 35409.6093 \\
+S1 & Small university election (100 voters) & protected & 35 & 3000 & 1.0000 & 0.0000 & 0.0000 & 0 & 0 & 0 & 0.0000 & 0.0000 & NaN & 0.0000 & 0.0000 & bribery & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+S2 & Medium organisation election (10,000 voters) & baseline & 1943 & 250000 & 0.0000 & 0.0500 & 0.9500 & 0 & 260 & 3000 & 2077.2000 & 1.0000 & NaN & 1.0000 & 1783518.9291 & bribery & 0.3277 & 255503.1621 & 0.6723 & 1528015.7670 \\
+S2 & Medium organisation election (10,000 voters) & protected & 1943 & 250000 & 1.0000 & 0.0000 & 0.0000 & 0 & 0 & 0 & 0.0000 & 0.0000 & NaN & 0.0000 & 0.0000 & bribery & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+S3 & Large national-scale election (100,000 voters) & baseline & 19015 & 3000000 & 0.0000 & 0.0500 & 0.9500 & 0 & 2500 & 30000 & 20700.0000 & 1.0000 & NaN & 1.0000 & 17675000.0000 & bribery & 0.3204 & 1907536.0062 & 0.6796 & 15767463.9938 \\
+S3 & Large national-scale election (100,000 voters) & protected & 19015 & 3000000 & 1.0000 & 0.0000 & 0.0000 & 0 & 0 & 0 & 0.0000 & 0.0000 & NaN & 0.0000 & 0.0000 & bribery & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+S4 & High-budget attack (maximum attacker capability) & baseline & 4758 & 5000000 & 0.1000 & 0.0000 & 0.9000 & 5000 & 0 & 1500 & 5695.0000 & 1.0000 & NaN & 1.0000 & 4077500.0000 & bribery & 0.3159 & 679480.1805 & 0.6841 & 3398019.8195 \\
+S4 & High-budget attack (maximum attacker capability) & protected & 4758 & 5000000 & 1.0000 & 0.0000 & 0.0000 & 0 & 0 & 0 & 0.0000 & 0.0000 & NaN & 0.0000 & 0.0000 & bribery & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+S5 & Low-budget attack (expected to fail) & baseline & 550 & 8000 & 1.0000 & 0.0000 & 0.0000 & 80 & 0 & 0 & 76.0000 & 0.0000 & 0.0000 & 0.9835 & -106348.4626 & bribery & 0.0000 & -106348.4626 & 0.0000 & 0.0000 \\
+S5 & Low-budget attack (expected to fail) & protected & 550 & 8000 & 1.0000 & 0.0000 & 0.0000 & 0 & 0 & 0 & 0.0000 & 0.0000 & NaN & 0.0000 & 0.0000 & bribery & 0.0000 & 0.0000 & 0.0000 & 0.0000 \\
+\bottomrule
+\end{tabular}
+}
+}
+\end{landscape}
+\begin{landscape}
+\subsection*{Table 14. Sensitivity of the coalition finding to cost assumptions}
+\addcontentsline{toc}{subsection}{Table 14. Sensitivity of the coalition finding to cost assumptions}
+{\tiny
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{lllllllllll}
+\toprule
+scenario id & identity cost ratio & ballot cost ratio & sybil ceiling fraction & ballot ceiling fraction & coalition exact p & best pure exact p & coalition utility & best pure utility & coalition at least as good & coalition strictly better \\
+\midrule
+\endfirsthead
+\toprule
+scenario id & identity cost ratio & ballot cost ratio & sybil ceiling fraction & ballot ceiling fraction & coalition exact p & best pure exact p & coalition utility & best pure utility & coalition at least as good & coalition strictly better \\
+\midrule
+\endhead
+\midrule
+\multicolumn{11}{r}{Continued on next page} \\
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+S1 & 0.2000 & 0.0500 & 0.1000 & 0.1500 & 0.9995 & 0.4231 & 56356.0926 & 21471.9356 & True & True \\
+S2 & 0.2000 & 0.0500 & 0.1000 & 0.1500 & 1.0000 & 0.3277 & 1767073.3386 & 255503.1621 & True & True \\
+S3 & 0.2000 & 0.0500 & 0.1000 & 0.1500 & 1.0000 & 0.3204 & 17487500.0000 & 1907536.0062 & True & True \\
+S1 & 0.2000 & 0.0500 & 0.1000 & 0.3000 & 0.9997 & 0.4231 & 56947.0209 & 21471.9356 & True & True \\
+S2 & 0.2000 & 0.0500 & 0.1000 & 0.3000 & 1.0000 & 0.3277 & 1808000.0000 & 255503.1621 & True & True \\
+S3 & 0.2000 & 0.0500 & 0.1000 & 0.3000 & 1.0000 & 0.3204 & 17975000.0000 & 1907536.0062 & True & True \\
+S1 & 0.2000 & 0.0500 & 0.2000 & 0.1500 & 0.9987 & 0.4231 & 56787.6301 & 21471.9356 & True & True \\
+S2 & 0.2000 & 0.0500 & 0.2000 & 0.1500 & 1.0000 & 0.3277 & 1793000.0000 & 255503.1621 & True & True \\
+S3 & 0.2000 & 0.0500 & 0.2000 & 0.1500 & 1.0000 & 0.3204 & 17787500.0000 & 1907536.0062 & True & True \\
+S1 & 0.2000 & 0.0500 & 0.2000 & 0.3000 & 0.9997 & 0.4231 & 57346.1828 & 21471.9356 & True & True \\
+S2 & 0.2000 & 0.0500 & 0.2000 & 0.3000 & 1.0000 & 0.3277 & 1807039.8376 & 255503.1621 & True & True \\
+S3 & 0.2000 & 0.0500 & 0.2000 & 0.3000 & 1.0000 & 0.3204 & 17975000.0000 & 1907536.0062 & True & True \\
+S1 & 0.2000 & 0.1500 & 0.1000 & 0.1500 & 0.9995 & 0.4231 & 56236.0926 & 21471.9356 & True & True \\
+S2 & 0.2000 & 0.1500 & 0.1000 & 0.1500 & 1.0000 & 0.3277 & 1749073.3386 & 255503.1621 & True & True \\
+S3 & 0.2000 & 0.1500 & 0.1000 & 0.1500 & 1.0000 & 0.3204 & 17300006.0941 & 1907536.0062 & True & True \\
+S1 & 0.2000 & 0.1500 & 0.1000 & 0.3000 & 0.9997 & 0.4231 & 56707.0209 & 21471.9356 & True & True \\
+S2 & 0.2000 & 0.1500 & 0.1000 & 0.3000 & 1.0000 & 0.3277 & 1776014.0000 & 255503.1621 & True & True \\
+S3 & 0.2000 & 0.1500 & 0.1000 & 0.3000 & 1.0000 & 0.3204 & 17600015.0000 & 1907536.0062 & True & True \\
+S1 & 0.2000 & 0.1500 & 0.2000 & 0.1500 & 0.9987 & 0.4231 & 56667.6301 & 21471.9356 & True & True \\
+S2 & 0.2000 & 0.1500 & 0.2000 & 0.1500 & 1.0000 & 0.3277 & 1777016.0000 & 255503.1621 & True & True \\
+S3 & 0.2000 & 0.1500 & 0.2000 & 0.1500 & 1.0000 & 0.3204 & 17600007.5000 & 1907536.0062 & True & True \\
+S1 & 0.2000 & 0.1500 & 0.2000 & 0.3000 & 0.9997 & 0.4231 & 57106.1828 & 21471.9356 & True & True \\
+S2 & 0.2000 & 0.1500 & 0.2000 & 0.3000 & 1.0000 & 0.3277 & 1777016.0000 & 255503.1621 & True & True \\
+S3 & 0.2000 & 0.1500 & 0.2000 & 0.3000 & 1.0000 & 0.3204 & 17600007.5000 & 1907536.0062 & True & True \\
+S1 & 0.2000 & 0.4000 & 0.1000 & 0.1500 & 0.9881 & 0.4231 & 55446.3963 & 21471.9356 & True & True \\
+S2 & 0.2000 & 0.4000 & 0.1000 & 0.1500 & 1.0000 & 0.3277 & 1704073.3386 & 255503.1621 & True & True \\
+S3 & 0.2000 & 0.4000 & 0.1000 & 0.1500 & 1.0000 & 0.3204 & 16700000.0000 & 1907536.0062 & True & True \\
+S1 & 0.2000 & 0.4000 & 0.1000 & 0.3000 & 0.9993 & 0.4231 & 56142.9381 & 21471.9356 & True & True \\
+S2 & 0.2000 & 0.4000 & 0.1000 & 0.3000 & 0.9997 & 0.3277 & 1725355.1119 & 255503.1621 & True & True \\
+S3 & 0.2000 & 0.4000 & 0.1000 & 0.3000 & 1.0000 & 0.3204 & 17000000.0000 & 1907536.0062 & True & True \\
+S1 & 0.2000 & 0.4000 & 0.2000 & 0.1500 & 0.9987 & 0.4231 & 56367.6301 & 21471.9356 & True & True \\
+S2 & 0.2000 & 0.4000 & 0.2000 & 0.1500 & 1.0000 & 0.3277 & 1752031.9974 & 255503.1621 & True & True \\
+S3 & 0.2000 & 0.4000 & 0.2000 & 0.1500 & 1.0000 & 0.3204 & 17300000.0000 & 1907536.0062 & True & True \\
+S1 & 0.2000 & 0.4000 & 0.2000 & 0.3000 & 0.9993 & 0.4231 & 56543.9245 & 21471.9356 & True & True \\
+S2 & 0.2000 & 0.4000 & 0.2000 & 0.3000 & 1.0000 & 0.3277 & 1752031.9974 & 255503.1621 & True & True \\
+S3 & 0.2000 & 0.4000 & 0.2000 & 0.3000 & 1.0000 & 0.3204 & 17300000.0000 & 1907536.0062 & True & True \\
+S1 & 0.4000 & 0.0500 & 0.1000 & 0.1500 & 0.9990 & 0.4231 & 56200.3147 & 21471.9356 & True & True \\
+S2 & 0.4000 & 0.0500 & 0.1000 & 0.1500 & 1.0000 & 0.3277 & 1743073.3386 & 255503.1621 & True & True \\
+S3 & 0.4000 & 0.0500 & 0.1000 & 0.1500 & 1.0000 & 0.3204 & 17187500.0000 & 1907536.0062 & True & True \\
+S1 & 0.4000 & 0.0500 & 0.1000 & 0.3000 & 0.9995 & 0.4231 & 56805.7090 & 21471.9356 & True & True \\
+S2 & 0.4000 & 0.0500 & 0.1000 & 0.3000 & 1.0000 & 0.3277 & 1807040.0000 & 255503.1621 & True & True \\
+S3 & 0.4000 & 0.0500 & 0.1000 & 0.3000 & 1.0000 & 0.3204 & 17975000.0000 & 1907536.0062 & True & True \\
+S1 & 0.4000 & 0.0500 & 0.2000 & 0.1500 & 0.9987 & 0.4231 & 56467.6301 & 21471.9356 & True & True \\
+S2 & 0.4000 & 0.0500 & 0.2000 & 0.1500 & 1.0000 & 0.3277 & 1766022.9615 & 255503.1621 & True & True \\
+S3 & 0.4000 & 0.0500 & 0.2000 & 0.1500 & 1.0000 & 0.3204 & 17487500.0000 & 1907536.0062 & True & True \\
+S1 & 0.4000 & 0.0500 & 0.2000 & 0.3000 & 0.9992 & 0.4231 & 57055.3374 & 21471.9356 & True & True \\
+S2 & 0.4000 & 0.0500 & 0.2000 & 0.3000 & 1.0000 & 0.3277 & 1807040.0000 & 255503.1621 & True & True \\
+S3 & 0.4000 & 0.0500 & 0.2000 & 0.3000 & 1.0000 & 0.3204 & 17975000.0000 & 1907536.0062 & True & True \\
+S1 & 0.4000 & 0.1500 & 0.1000 & 0.1500 & 0.9990 & 0.4231 & 56080.3147 & 21471.9356 & True & True \\
+S2 & 0.4000 & 0.1500 & 0.1000 & 0.1500 & 1.0000 & 0.3277 & 1725073.3386 & 255503.1621 & True & True \\
+S3 & 0.4000 & 0.1500 & 0.1000 & 0.1500 & 1.0000 & 0.3204 & 17000006.0941 & 1907536.0062 & True & True \\
+S1 & 0.4000 & 0.1500 & 0.1000 & 0.3000 & 0.9995 & 0.4231 & 56565.7090 & 21471.9356 & True & True \\
+S2 & 0.4000 & 0.1500 & 0.1000 & 0.3000 & 1.0000 & 0.3277 & 1771040.0000 & 255503.1621 & True & True \\
+S3 & 0.4000 & 0.1500 & 0.1000 & 0.3000 & 1.0000 & 0.3204 & 17525000.0000 & 1907536.0062 & True & True \\
+S1 & 0.4000 & 0.1500 & 0.2000 & 0.1500 & 0.9987 & 0.4231 & 56347.6301 & 21471.9356 & True & True \\
+S2 & 0.4000 & 0.1500 & 0.2000 & 0.1500 & 1.0000 & 0.3277 & 1748022.9615 & 255503.1621 & True & True \\
+S3 & 0.4000 & 0.1500 & 0.2000 & 0.1500 & 1.0000 & 0.3204 & 17262500.0000 & 1907536.0062 & True & True \\
+S1 & 0.4000 & 0.1500 & 0.2000 & 0.3000 & 0.9992 & 0.4231 & 56815.3374 & 21471.9356 & True & True \\
+S2 & 0.4000 & 0.1500 & 0.2000 & 0.3000 & 1.0000 & 0.3277 & 1771040.0000 & 255503.1621 & True & True \\
+S3 & 0.4000 & 0.1500 & 0.2000 & 0.3000 & 1.0000 & 0.3204 & 17525000.0000 & 1907536.0062 & True & True \\
+S1 & 0.4000 & 0.4000 & 0.1000 & 0.1500 & 0.9789 & 0.4231 & 54771.5502 & 21471.9356 & True & True \\
+S2 & 0.4000 & 0.4000 & 0.1000 & 0.1500 & 1.0000 & 0.3277 & 1680073.3386 & 255503.1621 & True & True \\
+S3 & 0.4000 & 0.4000 & 0.1000 & 0.1500 & 1.0000 & 0.3204 & 16400000.0000 & 1907536.0062 & True & True \\
+S1 & 0.4000 & 0.4000 & 0.1000 & 0.3000 & 0.9987 & 0.4231 & 55978.5555 & 21471.9356 & True & True \\
+S2 & 0.4000 & 0.4000 & 0.1000 & 0.3000 & 0.9997 & 0.3277 & 1701355.1119 & 255503.1621 & True & True \\
+S3 & 0.4000 & 0.4000 & 0.1000 & 0.3000 & 1.0000 & 0.3204 & 16700000.0000 & 1907536.0062 & True & True \\
+S1 & 0.4000 & 0.4000 & 0.2000 & 0.1500 & 0.9958 & 0.4231 & 55939.2111 & 21471.9356 & True & True \\
+S2 & 0.4000 & 0.4000 & 0.2000 & 0.1500 & 1.0000 & 0.3277 & 1704031.9974 & 255503.1621 & True & True \\
+S3 & 0.4000 & 0.4000 & 0.2000 & 0.1500 & 1.0000 & 0.3204 & 16700000.0000 & 1907536.0062 & True & True \\
+S1 & 0.4000 & 0.4000 & 0.2000 & 0.3000 & 0.9993 & 0.4231 & 56223.9245 & 21471.9356 & True & True \\
+S2 & 0.4000 & 0.4000 & 0.2000 & 0.3000 & 1.0000 & 0.3277 & 1704031.9974 & 255503.1621 & True & True \\
+S3 & 0.4000 & 0.4000 & 0.2000 & 0.3000 & 1.0000 & 0.3204 & 16700000.0000 & 1907536.0062 & True & True \\
+S1 & 0.8000 & 0.0500 & 0.1000 & 0.1500 & 0.9816 & 0.4231 & 55210.7680 & 21471.9356 & True & True \\
+S2 & 0.8000 & 0.0500 & 0.1000 & 0.1500 & 1.0000 & 0.3277 & 1695073.3386 & 255503.1621 & True & True \\
+S3 & 0.8000 & 0.0500 & 0.1000 & 0.1500 & 1.0000 & 0.3204 & 16587500.0000 & 1907536.0062 & True & True \\
+S1 & 0.8000 & 0.0500 & 0.1000 & 0.3000 & 0.9964 & 0.4231 & 56587.8295 & 21471.9356 & True & True \\
+S2 & 0.8000 & 0.0500 & 0.1000 & 0.3000 & 1.0000 & 0.3277 & 1807039.8376 & 255503.1621 & True & True \\
+S3 & 0.8000 & 0.0500 & 0.1000 & 0.3000 & 1.0000 & 0.3204 & 17975000.0000 & 1907536.0062 & True & True \\
+S1 & 0.8000 & 0.0500 & 0.2000 & 0.1500 & 0.9816 & 0.4231 & 55210.7680 & 21471.9356 & True & True \\
+S2 & 0.8000 & 0.0500 & 0.2000 & 0.1500 & 1.0000 & 0.3277 & 1691143.9853 & 255503.1621 & True & True \\
+S3 & 0.8000 & 0.0500 & 0.2000 & 0.1500 & 1.0000 & 0.3204 & 16587500.0000 & 1907536.0062 & True & True \\
+S1 & 0.8000 & 0.0500 & 0.2000 & 0.3000 & 0.9964 & 0.4231 & 56587.8295 & 21471.9356 & True & True \\
+S2 & 0.8000 & 0.0500 & 0.2000 & 0.3000 & 1.0000 & 0.3277 & 1807039.8376 & 255503.1621 & True & True \\
+S3 & 0.8000 & 0.0500 & 0.2000 & 0.3000 & 1.0000 & 0.3204 & 17975000.0000 & 1907536.0062 & True & True \\
+S1 & 0.8000 & 0.1500 & 0.1000 & 0.1500 & 0.9816 & 0.4231 & 55090.7680 & 21471.9356 & True & True \\
+S2 & 0.8000 & 0.1500 & 0.1000 & 0.1500 & 1.0000 & 0.3277 & 1677073.3386 & 255503.1621 & True & True \\
+S3 & 0.8000 & 0.1500 & 0.1000 & 0.1500 & 1.0000 & 0.3204 & 16400006.0941 & 1907536.0062 & True & True \\
+S1 & 0.8000 & 0.1500 & 0.1000 & 0.3000 & 0.9964 & 0.4231 & 56347.8295 & 21471.9356 & True & True \\
+S2 & 0.8000 & 0.1500 & 0.1000 & 0.3000 & 1.0000 & 0.3277 & 1771039.8376 & 255503.1621 & True & True \\
+S3 & 0.8000 & 0.1500 & 0.1000 & 0.3000 & 1.0000 & 0.3204 & 17525000.0000 & 1907536.0062 & True & True \\
+S1 & 0.8000 & 0.1500 & 0.2000 & 0.1500 & 0.9816 & 0.4231 & 55090.7680 & 21471.9356 & True & True \\
+S2 & 0.8000 & 0.1500 & 0.2000 & 0.1500 & 1.0000 & 0.3277 & 1673143.9853 & 255503.1621 & True & True \\
+S3 & 0.8000 & 0.1500 & 0.2000 & 0.1500 & 1.0000 & 0.3204 & 16362500.0000 & 1907536.0062 & True & True \\
+S1 & 0.8000 & 0.1500 & 0.2000 & 0.3000 & 0.9964 & 0.4231 & 56347.8295 & 21471.9356 & True & True \\
+S2 & 0.8000 & 0.1500 & 0.2000 & 0.3000 & 1.0000 & 0.3277 & 1771039.8376 & 255503.1621 & True & True \\
+S3 & 0.8000 & 0.1500 & 0.2000 & 0.3000 & 1.0000 & 0.3204 & 17525000.0000 & 1907536.0062 & True & True \\
+S1 & 0.8000 & 0.4000 & 0.1000 & 0.1500 & 0.8571 & 0.4231 & 47560.7561 & 21471.9356 & True & True \\
+S2 & 0.8000 & 0.4000 & 0.1000 & 0.1500 & 1.0000 & 0.3277 & 1632073.3386 & 255503.1621 & True & True \\
+S3 & 0.8000 & 0.4000 & 0.1000 & 0.1500 & 1.0000 & 0.3204 & 15800000.0000 & 1907536.0062 & True & True \\
+S1 & 0.8000 & 0.4000 & 0.1000 & 0.3000 & 0.9906 & 0.4231 & 55467.9365 & 21471.9356 & True & True \\
+S2 & 0.8000 & 0.4000 & 0.1000 & 0.3000 & 1.0000 & 0.3277 & 1681039.8376 & 255503.1621 & True & True \\
+S3 & 0.8000 & 0.4000 & 0.1000 & 0.3000 & 1.0000 & 0.3204 & 16400000.0000 & 1907536.0062 & True & True \\
+S1 & 0.8000 & 0.4000 & 0.2000 & 0.1500 & 0.8571 & 0.4231 & 47560.7561 & 21471.9356 & True & True \\
+S2 & 0.8000 & 0.4000 & 0.2000 & 0.1500 & 1.0000 & 0.3277 & 1628143.9853 & 255503.1621 & True & True \\
+S3 & 0.8000 & 0.4000 & 0.2000 & 0.1500 & 1.0000 & 0.3204 & 15800000.0000 & 1907536.0062 & True & True \\
+S1 & 0.8000 & 0.4000 & 0.2000 & 0.3000 & 0.9906 & 0.4231 & 55467.9365 & 21471.9356 & True & True \\
+S2 & 0.8000 & 0.4000 & 0.2000 & 0.3000 & 1.0000 & 0.3277 & 1681039.8376 & 255503.1621 & True & True \\
+S3 & 0.8000 & 0.4000 & 0.2000 & 0.3000 & 1.0000 & 0.3204 & 16400000.0000 & 1907536.0062 & True & True \\
+\end{longtable}
+
+}
+\end{landscape}
+
+\clearpage
+
+\end{document}

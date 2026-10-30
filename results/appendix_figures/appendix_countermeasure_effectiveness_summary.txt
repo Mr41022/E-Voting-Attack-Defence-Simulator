@@ -1,0 +1,14 @@
+Figure:
+appendix_countermeasure_effectiveness_summary
+
+What this graph shows:
+The graph converts the recorded summary.json countermeasure effectiveness evidence into a clean thesis-facing percentage reduction comparison across the three attack families.
+
+Main observation:
+Bribery, Sybil, and ballot stuffing each show a large relative reduction after the protected countermeasures are applied, highlighting that the protection architecture is reasonably robust across attack types.
+
+Why it matters:
+It is an evidence summary rather than a policy-claim figure: it shows the modelled reduction effect recorded in the generated project artifacts.
+
+Limitation:
+It should not be read as a universal real-election claim outside the parameter space and scenarios captured by the current simulation snapshot.

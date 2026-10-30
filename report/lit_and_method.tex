@@ -1,0 +1,294 @@
+%=======================================================================
+%  Standalone extract: Literature Review + Research Methodology
+%
+%  Built by generate_extract.py, which preprocesses the SAME chapter
+%  sources the full dissertation uses (report/sections/*.tex) so the two
+%  documents cannot drift apart. Do not edit the chapters here.
+%=======================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx}
+\usepackage[scaled=0.88]{helvet}
+\usepackage{amsmath,amssymb}
+\usepackage[margin=2.6cm,top=2.8cm,bottom=2.9cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[font=small,labelfont=bf,labelsep=period,justification=justified]{caption}
+\usepackage{tcolorbox}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{accent}{HTML}{0072B2}
+\definecolor{warm}{HTML}{D55E00}
+\definecolor{inkmuted}{HTML}{4D4D4D}
+\definecolor{rule}{HTML}{BFBFBF}
+\definecolor{panel}{HTML}{F4F7FA}
+
+\hypersetup{colorlinks=true, linkcolor=accent, citecolor=accent,
+            urlcolor=accent, linktoc=all,
+            pdftitle={Blockchain-Based Electronic Voting:
+                      Literature Review and Research Methodology},
+            pdfsubject={MSc Computing Science dissertation --- extract}}
+
+\titleformat{\section}{\normalfont\sffamily\large\bfseries\color{black}}
+            {\thesection}{0.8em}{}[\vspace{2pt}\color{rule}\hrule height 0.6pt]
+\titleformat{\subsection}{\normalfont\sffamily\normalsize\bfseries}{\thesubsection}{0.7em}{}
+\titleformat{\subsubsection}{\normalfont\sffamily\small\bfseries}{\thesubsubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{20pt}{10pt}
+\titlespacing*{\subsection}{0pt}{14pt}{6pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhead[L]{\footnotesize\sffamily\color{inkmuted}Literature Review and Research Methodology}
+\fancyhead[R]{\footnotesize\sffamily\color{inkmuted}\thepage}
+
+\setlength{\parskip}{0.42em}
+\setlength{\parindent}{0pt}
+\onehalfspacing
+
+\newtcolorbox{finding}[1][]{colback=panel, colframe=accent, boxrule=0pt,
+  leftrule=2.6pt, arc=1pt, left=9pt, right=9pt, top=7pt, bottom=7pt,
+  fontupper=\normalsize, #1}
+\newcommand{\finhead}[1]{\textsf{\bfseries #1}\par\vspace{2pt}}
+
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\Ex}{\mathbb{E}}
+\newcommand{\Bin}{\mathrm{Binomial}}
+\newcommand{\Uv}{U_{v}}
+\newcommand{\figref}[1]{Figure~\ref{#1}}
+\newcommand{\tabref}[1]{Table~\ref{#1}}
+\newcommand{\eqnref}[1]{Equation~(\ref{#1})}
+\newcommand{\code}[1]{\texttt{\small #1}}
+
+\input{generated/numbers}
+
+\begin{document}
+
+%=======================================================================
+\begin{titlepage}
+\thispagestyle{empty}
+\centering
+\vspace*{1.4cm}
+
+{\sffamily\Large University of Glasgow}\\[2pt]
+{\sffamily\normalsize School of Computing Science}\\[3.4cm]
+
+{\color{rule}\rule{\textwidth}{0.9pt}}\\[0.7cm]
+{\sffamily\LARGE\bfseries Blockchain-Based Electronic Voting}\\[0.42cm]
+{\sffamily\Large Literature Review and Research Methodology}\\[0.7cm]
+{\color{rule}\rule{\textwidth}{0.9pt}}\\[1.4cm]
+
+{\large Mathematical modelling and experimental evaluation of}\\[3pt]
+{\large bribery, Sybil and ballot-stuffing attacks}\\[2.8cm]
+
+{\sffamily\large MSc Computing Science}\\[0.35cm]
+{\sffamily\normalsize Dissertation --- extract}\\[2.2cm]
+
+\begin{minipage}{0.82\textwidth}
+\centering
+{\itshape Author, supervisor and submission date to be completed by the candidate.}
+\end{minipage}
+
+\vfill
+\begin{minipage}{0.86\textwidth}
+{\footnotesize\color{inkmuted}
+This document contains two chapters of the dissertation --- the
+literature review and the research design and methodology --- together
+with a short summary of the formal model they refer to. The results
+themselves are reported in the full dissertation. References to
+chapters not reproduced here are named rather than numbered.
+Experimental figures quoted in the methodology are injected from the
+accompanying simulation output (seed \Seed, \TotalTrials{} paired
+trials) and are reproducible bit-for-bit. No real election system,
+voter record or personal datum is used anywhere in this work.}
+\end{minipage}
+\end{titlepage}
+
+%=======================================================================
+\clearpage
+\tableofcontents
+\clearpage
+
+%=======================================================================
+\section{Preliminaries: the model in brief}
+\label{sec:prelim}
+
+This section states just enough of the formal model for the two
+chapters that follow to be read on their own. It is a summary of the
+dissertation's model chapter, not a substitute for it: the derivations,
+edge-case conventions and correctness arguments are given there.
+
+\subsection{Threat model}
+
+A single attacker attempts to change the outcome of a two-candidate
+election with $N$ enrolled voters. The \emph{manipulation threshold}
+$m$ is the number of additional fraudulent votes needed to overturn the
+honest margin,
+\begin{equation}
+m = (\text{opponent votes} - \text{target votes}) + 1 ,
+\label{eq:threshold}
+\end{equation}
+and the attack succeeds precisely when at least $m$ fraudulent votes
+survive every countermeasure and reach the final count. Three vectors
+are available: \textbf{bribery} of genuine voters, constrained by a
+budget $B$ at a reward $R$ per voter and detected with probability $q$;
+\textbf{Sybil registration} of $S$ forged identities, each accepted
+with probability $q_s$ and detected with probability $p_d$; and
+\textbf{ballot stuffing} of $A$ fraudulent ballots, each accepted with
+probability $q_b$ and detected with probability $p_b$.
+
+\subsection{The equations referred to below}
+
+A voter offered a bribe faces a decision under risk, gaining $R$ if
+undetected and paying a penalty $P$ if not:
+\begin{equation}
+\Uv = (1 - q) R - q P ,
+\label{eq:m1}
+\end{equation}
+and a risk-neutral voter accepts when $\Uv > 0$. This acts as a
+\emph{gate}: where bribery is not incentive-compatible, no bribe is
+accepted and the attack contributes nothing at any budget.
+
+Attempts within a vector are independent Bernoulli trials, so the count
+of surviving fraudulent votes is binomial and the success probability
+is its survival function:
+\begin{equation}
+\Prob(W \geq m) = \sum_{k=m}^{n} \binom{n}{k} p^{k}(1-p)^{n-k},
+\qquad \Ex[W] = \mu = np .
+\label{eq:m5}
+\end{equation}
+
+A forged identity or an injected ballot must clear two independent
+gates to be counted --- acceptance and non-detection --- so the
+surviving count is
+\begin{equation}
+W \sim \Bin\big(n,\; q_{\text{accept}}(1 - p_{\text{detect}})\big).
+\label{eq:survival}
+\end{equation}
+
+Finally, the attacker's expected utility from $T$ bribery attempts,
+given a payoff $V$ for flipping the outcome and a penalty $D$ if the
+attack is noticed at all, is
+\begin{equation}
+U(T) = \Prob(X \geq m)\, V \;-\; T R \;-\; \big[1 - (1-q)^{T}\big] D .
+\label{eq:utility}
+\end{equation}
+
+Throughout, $q$ denotes the \emph{detection} probability, so a bribed
+vote survives with probability $1-q$.
+
+%=======================================================================
+\clearpage
+\input{generated/extract/literature_review}
+
+%=======================================================================
+\clearpage
+\input{generated/extract/methodology}
+
+\input{generated/tables/parameter_ranges}
+
+%=======================================================================
+\clearpage
+\addcontentsline{toc}{section}{References}
+\begin{thebibliography}{99}
+
+\bibitem{adida2008} B.~Adida. Helios: Web-based Open-Audit Voting. In
+\emph{Proceedings of the 17th USENIX Security Symposium}, pp.~335--348, 2008.
+
+\bibitem{becker1968} G.~S.~Becker. Crime and Punishment: An Economic Approach.
+\emph{Journal of Political Economy}, 76(2):169--217, 1968.
+
+\bibitem{benaloh1994} J.~Benaloh and D.~Tuinstra. Receipt-Free Secret-Ballot
+Elections (Extended Abstract). In \emph{Proceedings of the 26th Annual ACM
+Symposium on Theory of Computing (STOC)}, pp.~544--553, 1994.
+
+\bibitem{borge2017} M.~Borge, E.~Kokoris-Kogias, P.~Jovanovic, L.~Gasser,
+N.~Gailly and B.~Ford. Proof-of-Personhood: Redemocratizing Permissionless
+Cryptocurrencies. In \emph{IEEE European Symposium on Security and Privacy
+Workshops (EuroS\&PW)}, pp.~23--26, 2017.
+
+\bibitem{chernoff1952} H.~Chernoff. A Measure of Asymptotic Efficiency for Tests
+of a Hypothesis Based on the Sum of Observations. \emph{Annals of Mathematical
+Statistics}, 23(4):493--507, 1952.
+
+\bibitem{daian2018} P.~Daian, T.~Kell, I.~Bentov and A.~Juels. On-Chain Vote
+Buying and the Rise of Dark DAOs. \emph{Hacking, Distributed} (IC3 technical
+report), July 2018. Available at
+\url{https://hackingdistributed.com/2018/07/02/on-chain-vote-buying/}.
+\emph{Cited as a technical report; not peer reviewed.}
+
+\bibitem{douceur2002} J.~R.~Douceur. The Sybil Attack. In \emph{Proceedings of
+the 1st International Workshop on Peer-to-Peer Systems (IPTPS)}, LNCS 2429,
+pp.~251--260, 2002.
+
+\bibitem{eyal2014} I.~Eyal and E.~G.~Sirer. Majority Is Not Enough: Bitcoin
+Mining Is Vulnerable. In \emph{Financial Cryptography and Data Security (FC)},
+LNCS 8437, pp.~436--454, 2014.
+
+\bibitem{faliszewski2009} P.~Faliszewski, E.~Hemaspaandra and
+L.~A.~Hemaspaandra. How Hard Is Bribery in Elections? \emph{Journal of
+Artificial Intelligence Research}, 35:485--532, 2009.
+
+\bibitem{juels2005} A.~Juels, D.~Catalano and M.~Jakobsson. Coercion-Resistant
+Electronic Elections. In \emph{Proceedings of the 2005 ACM Workshop on Privacy
+in the Electronic Society (WPES)}, pp.~61--70, 2005.
+
+\bibitem{klimek2012} P.~Klimek, Y.~Yegorov, R.~Hanel and S.~Thurner.
+Statistical Detection of Systematic Election Irregularities. \emph{Proceedings
+of the National Academy of Sciences}, 109(41):16469--16473, 2012.
+
+\bibitem{liu2019} Z.~Liu, N.~C.~Luong, W.~Wang, D.~Niyato, P.~Wang,
+Y.-C.~Liang and D.~I.~Kim. A Survey on Applications of Game Theory in
+Blockchain. \emph{arXiv preprint} arXiv:1902.10865, 2019.
+
+\bibitem{mccorry2017} P.~McCorry, S.~F.~Shahandashti and F.~Hao. A Smart
+Contract for Boardroom Voting with Maximum Voter Privacy. In \emph{Financial
+Cryptography and Data Security (FC)}, LNCS 10322, pp.~357--375, 2017.
+
+\bibitem{mitzenmacher2017} M.~Mitzenmacher and E.~Upfal. \emph{Probability and
+Computing: Randomization and Probabilistic Techniques in Algorithms and Data
+Analysis}. 2nd ed., Cambridge University Press, 2017.
+
+\bibitem{nakamoto2008} S.~Nakamoto. \emph{Bitcoin: A Peer-to-Peer Electronic
+Cash System}. 2008.
+
+\bibitem{ohize2025} H.~O.~Ohize, A.~J.~Onumanyi, B.~U.~Umar, L.~A.~Ajao,
+R.~O.~Isah, E.~M.~Dogo, B.~K.~Nuhu, O.~M.~Olaniyi, J.~G.~Ambafi, V.~B.~Sheidu
+and M.~M.~Ibrahim. Blockchain for Securing Electronic Voting Systems: A Survey
+of Architectures, Trends, Solutions, and Challenges. \emph{Cluster Computing},
+28, 2025. DOI 10.1007/s10586-024-04709-8.
+
+\bibitem{park2021} S.~Park, M.~Specter, N.~Narula and R.~L.~Rivest. Going from
+Bad to Worse: From Internet Voting to Blockchain Voting. \emph{Journal of
+Cybersecurity}, 7(1):tyaa025, 2021.
+
+\bibitem{rahul2025} Rahul, P.~Gulia and N.~S.~Gill. Articulation of Blockchain
+Enabled E-Voting Systems: A Systematic Literature Review. \emph{Peer-to-Peer
+Networking and Applications}, 18:142, 2025. DOI 10.1007/s12083-025-01956-3.
+
+\bibitem{specter2020} M.~A.~Specter, J.~Koppel and D.~Weitzner. The Ballot is
+Busted Before the Blockchain: A Security Analysis of Voatz, the First Internet
+Voting Application Used in U.S. Federal Elections. In \emph{Proceedings of the
+29th USENIX Security Symposium}, pp.~1535--1553, 2020.
+
+\bibitem{springall2014} D.~Springall, T.~Finkenauer, Z.~Durumeric, J.~Kitcat,
+H.~Hursti, M.~MacAlpine and J.~A.~Halderman. Security Analysis of the Estonian
+Internet Voting System. In \emph{Proceedings of the 2014 ACM SIGSAC Conference
+on Computer and Communications Security (CCS)}, pp.~703--715, 2014.
+
+\end{thebibliography}
+
+\end{document}

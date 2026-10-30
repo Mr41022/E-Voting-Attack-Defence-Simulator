@@ -1,0 +1,7 @@
+[run_election_attacks] Running 300 concrete blockchain-backed election trials (seed=42)...
+[run_election_attacks] Done in 79.8s.
+[run_election_attacks] Wrote results/csv\election_outcome_results.csv (1800 rows)
+[run_election_attacks] Wrote results/json\election_outcome_summary.json
+  bribery: baseline flip rate 0.440 -> protected 0.013 (97.0% relative reduction)
+  sybil: baseline flip rate 0.547 -> protected 0.113 (79.3% relative reduction)
+  ballot_stuffing: baseline flip rate 0.550 -> protected 0.083 (84.8% relative reduction)

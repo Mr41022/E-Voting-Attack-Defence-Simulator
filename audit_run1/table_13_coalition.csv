@@ -1,0 +1,11 @@
+scenario_id,name,system_type,m,B,share_bribery,share_sybil,share_ballot_stuffing,n_bribery,n_sybil,n_ballot_stuffing,mu_total,coalition_exact_p,coalition_chernoff,coalition_p_noticed,coalition_utility,best_pure_vector,best_pure_exact_p,best_pure_utility,coalition_gain_p,coalition_gain_utility
+S1,Small university election (100 voters),baseline,35,3000,0.35,0.25,0.4,13,20,30,45.260000000000005,0.9986633601957304,,0.9982567196798002,56881.54489206403,bribery,0.42310351750620145,21471.93561845396,0.575559842689529,35409.60927361007
+S1,Small university election (100 voters),protected,35,3000,1.0,0.0,0.0,0,0,0,0.0,0.0,,0.0,0.0,bribery,0.0,0.0,0.0,0.0
+S2,"Medium organisation election (10,000 voters)",baseline,1943,250000,0.0,0.05,0.95,0,260,3000,2077.2,0.9999994645443949,,1.0,1783518.9290887897,bribery,0.32773158105626055,255503.16211252112,0.6722678834881344,1528015.7669762685
+S2,"Medium organisation election (10,000 voters)",protected,1943,250000,1.0,0.0,0.0,0,0,0,0.0,0.0,,0.0,0.0,bribery,0.0,0.0,0.0,0.0
+S3,"Large national-scale election (100,000 voters)",baseline,19015,3000000,0.0,0.05,0.95,0,2500,30000,20700.0,0.9999999999999994,,1.0,17674999.99999999,bribery,0.320376800310203,1907536.0062040603,0.6796231996897965,15767463.993795928
+S3,"Large national-scale election (100,000 voters)",protected,19015,3000000,1.0,0.0,0.0,0,0,0,0.0,0.0,,0.0,0.0,bribery,0.0,0.0,0.0,0.0
+S4,High-budget attack (maximum attacker capability),baseline,4758,5000000,0.1,0.0,0.9,5000,0,1500,5695.0,0.9999999999999992,,1.0,4077499.9999999963,bribery,0.3158960360985399,679480.1804926994,0.6841039639014593,3398019.819507297
+S4,High-budget attack (maximum attacker capability),protected,4758,5000000,1.0,0.0,0.0,0,0,0,0.0,0.0,,0.0,0.0,bribery,0.0,0.0,0.0,0.0
+S5,Low-budget attack (expected to fail),baseline,550,8000,1.0,0.0,0.0,80,0,0,76.0,0.0,1.2693487355772479e-267,0.9834846256149864,-106348.46256149864,bribery,0.0,-106348.46256149864,0.0,0.0
+S5,Low-budget attack (expected to fail),protected,550,8000,1.0,0.0,0.0,0,0,0,0.0,0.0,,0.0,0.0,bribery,0.0,0.0,0.0,0.0

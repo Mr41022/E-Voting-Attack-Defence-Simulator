@@ -1,0 +1,14 @@
+Figure:
+appendix_sensitivity_analysis
+
+What this graph shows:
+The graph summarises the robustness sweep over identity costs, ballot costs, and capacity ceilings.
+
+Main observation:
+The generated sweep indicates that the coalition result remains sensitive to the cost ratio assumptions, but is not purely a single-parameter artefact.
+
+Why it matters:
+It matters because it tests whether the dissertation’s coalition conclusion survives reasonable variations in the model’s parameters.
+
+Limitation:
+It does not prove the model is universal across all possible election settings.

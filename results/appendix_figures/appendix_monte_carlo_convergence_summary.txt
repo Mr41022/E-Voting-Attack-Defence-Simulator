@@ -1,0 +1,14 @@
+Figure:
+appendix_monte_carlo_convergence_summary
+
+What this graph shows:
+The graph presents a compact convergence ladder for the repository’s Monte Carlo evidence, using the recorded sample-size structure and the validated summary-level error narrative.
+
+Main observation:
+The curve is intentionally simple and shows that the recorded simulator gets progressively tighter as the sample-size schedule grows, making the reading reproducible for a dissertation appendix.
+
+Why it matters:
+It supports a reader-facing explanation of how the finite-sample evidence is chosen before the final estimate is accepted.
+
+Limitation:
+It is a convergence explanation, not a proof that every future scenario will settle at the same rate.

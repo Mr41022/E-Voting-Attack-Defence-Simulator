@@ -1,0 +1,14 @@
+Figure:
+appendix_budget_effect
+
+What this graph shows:
+The graph maps the signed attacker utility over a budget sweep for the named benchmark scenarios.
+
+Main observation:
+The curves show a threshold-like budget dependence: low budgets produce no attack, then the utility increases as the attacker can afford more bribes or more effort.
+
+Why it matters:
+It makes the resource-constrained structure of the model visible in a way that supports the dissertation’s budget and game-theoretic argument.
+
+Limitation:
+The data point is conditional on the scenario values and does not imply that every real budget increase yields a sustained linearly increasing utility.

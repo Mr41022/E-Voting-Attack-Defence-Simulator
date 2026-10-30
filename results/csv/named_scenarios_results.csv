@@ -1,0 +1,11 @@
+scenario_id,name,system_type,N,m,B,R,P,q,T,voter_decision,exact_probability,monte_carlo_probability,chernoff_bound,chernoff_tail,expected_successful_votes,T_star,utility_star,p_flip_at_T_star
+S1,Small university election (100 voters),baseline,100,35,3000,80,600,0.08,37,accept,0.423103517506202,0.4276,0.9866780113105003,upper,34.04,37,21471.935618453994,0.423103517506202
+S1,Small university election (100 voters),protected,100,35,3000,80,600,0.55,37,reject,0.0,0.0,,degenerate,0.0,0,0.0,0.0
+S2,"Medium organisation election (10,000 voters)",baseline,10000,1943,250000,120,900,0.07,2083,accept,0.3277315810562614,0.3354,0.9913338213147089,upper,1937.1899999999998,2083,255503.16211252275,0.3277315810562614
+S2,"Medium organisation election (10,000 voters)",protected,10000,1943,250000,120,900,0.55,2083,reject,0.0,0.0,,degenerate,0.0,0,0.0,0.0
+S3,"Large national-scale election (100,000 voters)",baseline,100000,19015,3000000,150,1200,0.05,20000,accept,0.3203768003102052,0.3262,0.9940979906171915,upper,19000.0,20000,1907536.006204104,0.3203768003102052
+S3,"Large national-scale election (100,000 voters)",protected,100000,19015,3000000,150,1200,0.55,20000,reject,0.0,0.0,,degenerate,0.0,0,0.0,0.0
+S4,High-budget attack (maximum attacker capability),baseline,5000,4758,5000000,100,500,0.05,5000,accept,0.3158960360985402,0.3086,0.9932895530824405,upper,4750.0,5000,679480.180492701,0.3158960360985402
+S4,High-budget attack (maximum attacker capability),protected,5000,4758,5000000,100,500,0.55,5000,reject,0.0,0.0,,degenerate,0.0,0,0.0,0.0
+S5,Low-budget attack (expected to fail),baseline,5000,550,8000,100,500,0.05,80,accept,0.0,0.0,1.2693487355772479e-267,upper,76.0,0,0.0,0.0
+S5,Low-budget attack (expected to fail),protected,5000,550,8000,100,500,0.55,80,reject,0.0,0.0,,degenerate,0.0,0,0.0,0.0

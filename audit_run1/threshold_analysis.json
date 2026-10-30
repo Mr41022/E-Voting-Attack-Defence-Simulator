@@ -1,0 +1,102 @@
+{
+  "generated_at": "2026-08-26 10:46:38",
+  "elapsed_seconds": 34.79,
+  "grid_step": 0.05,
+  "cost_model": {
+    "identity_cost_ratio": 0.4,
+    "ballot_cost_ratio": 0.15,
+    "sybil_ceiling_fraction": 0.2,
+    "ballot_ceiling_fraction": 0.3,
+    "certification_epsilon": 0.001,
+    "reachable_alpha": 0.5
+  },
+  "voter_gate": {
+    "q_voter_indifference_by_scenario": {
+      "S1": 0.11764705882352941,
+      "S2": 0.11764705882352941,
+      "S3": 0.1111111111111111,
+      "S4": 0.16666666666666666,
+      "S5": 0.16666666666666666
+    },
+    "protected_q": 0.55,
+    "n_scenarios_gate_open_baseline": 5,
+    "n_scenarios_gate_open_protected": 0
+  },
+  "critical_detection": {
+    "S1": 0.11764705882352941,
+    "S2": 0.07224453135398214,
+    "S3": 0.050447675462854606,
+    "S4": 0.05136203735051917,
+    "S5": 0.0
+  },
+  "break_even_budget": {
+    "S1": 2880.0000047683716,
+    "S2": 249480.0001522433,
+    "S3": 2998649.99975245,
+    "S4": 499400.0004368834,
+    "S5": 57100.00039720908
+  },
+  "coalition": {
+    "mean_baseline_exact_p": 0.7997325649480248,
+    "mean_protected_exact_p": 0.0,
+    "mean_gain_over_best_pure_baseline": 0.5223109779537839,
+    "n_scenarios_coalition_strictly_better": 4,
+    "per_scenario": {
+      "S1": {
+        "shares": {
+          "bribery": 0.35,
+          "sybil": 0.25,
+          "ballot_stuffing": 0.4
+        },
+        "coalition_exact_p": 0.9986633601957304,
+        "best_pure_vector": "bribery",
+        "best_pure_exact_p": 0.42310351750620145
+      },
+      "S2": {
+        "shares": {
+          "bribery": 0.0,
+          "sybil": 0.05,
+          "ballot_stuffing": 0.95
+        },
+        "coalition_exact_p": 0.9999994645443949,
+        "best_pure_vector": "bribery",
+        "best_pure_exact_p": 0.32773158105626055
+      },
+      "S3": {
+        "shares": {
+          "bribery": 0.0,
+          "sybil": 0.05,
+          "ballot_stuffing": 0.95
+        },
+        "coalition_exact_p": 0.9999999999999994,
+        "best_pure_vector": "bribery",
+        "best_pure_exact_p": 0.320376800310203
+      },
+      "S4": {
+        "shares": {
+          "bribery": 0.1,
+          "sybil": 0.0,
+          "ballot_stuffing": 0.9
+        },
+        "coalition_exact_p": 0.9999999999999992,
+        "best_pure_vector": "bribery",
+        "best_pure_exact_p": 0.3158960360985399
+      },
+      "S5": {
+        "shares": {
+          "bribery": 1.0,
+          "sybil": 0.0,
+          "ballot_stuffing": 0.0
+        },
+        "coalition_exact_p": 0.0,
+        "best_pure_vector": "bribery",
+        "best_pure_exact_p": 0.0
+      }
+    }
+  },
+  "sensitivity": {
+    "n_configurations": 108,
+    "pct_coalition_at_least_as_good": 100.0,
+    "pct_coalition_strictly_better": 100.0
+  }
+}

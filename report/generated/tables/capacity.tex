@@ -1,0 +1,21 @@
+\begin{table}[htbp]
+\centering
+\caption{Capacity of each vector at full effort, as a multiple of the manipulation threshold $m$ (baseline configuration).}
+\label{tab:capacity}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrr}
+\toprule
+Scenario & Bribery & Sybil & Ballot Stuffing & Combined \\
+\midrule
+S1 & 0.97 & 0.41 & 0.54 & 1.92 \\
+S2 & 1.00 & 0.74 & 0.97 & 2.71 \\
+S3 & 1.00 & 0.76 & 0.99 & 2.75 \\
+S4 & 1.00 & 0.15 & 0.20 & 1.35 \\
+S5 & 0.14 & 0.26 & 0.61 & 1.01 \\
+\bottomrule
+\end{tabular}%
+}
+\vspace{2pt}
+{\footnotesize\textit{Note.} Values are EXPECTED surviving votes over the threshold, so a value below 1.00 means the mean falls short --- not that the threshold is unreachable. Success remains possible on an upward fluctuation, though its probability collapses quickly: at a ratio of 0.97 the exact $P(X \geq m)$ is still 0.42 for bribery in S1, while by a ratio of 0.74 it is numerically zero. Every entry here falls below 1.00; the budget-feasible optimal coalition clears it in four of the five scenarios (\tabref{tab:coalition}).}
+\end{table}

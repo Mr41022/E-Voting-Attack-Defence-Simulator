@@ -1,0 +1,5 @@
+attack,measure,measure_definition,system,mean,median,std,min,max
+sybil,surviving_ge_m,P(surviving >= m): both gates -- HEADLINE,baseline,0.4803855052358909,0.0593175775088957,0.49225916217217397,0.0,1.0
+sybil,surviving_ge_m,P(surviving >= m): both gates -- HEADLINE,protected,0.13556976306672003,5.195115153006655e-139,0.32917237949158834,0.0,1.0
+sybil,accepted_ge_m,P(accepted >= m): acceptance gate only,baseline,0.5366114596184575,0.9993471493969854,0.49308552410206324,0.0,1.0
+sybil,accepted_ge_m,P(accepted >= m): acceptance gate only,protected,0.2991347845558826,2.389817719432833e-50,0.4485524891268898,0.0,1.0

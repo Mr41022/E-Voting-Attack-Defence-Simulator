@@ -1,0 +1,14 @@
+Figure:
+appendix_theory_vs_monte_carlo
+
+What this graph shows:
+The graph compares the simulated Monte Carlo estimate against the exact probability model across the three attack vectors.
+
+Main observation:
+The plotted points sit close to the diagonal and the MC estimate tracks the exact success probability within the expected finite-sample error envelope.
+
+Why it matters:
+This figure supports the claim that the simulator is numerically consistent with the adopted binomial calculation, rather than merely plotting the same abstract process twice.
+
+Limitation:
+It does not prove that the model is correct; it only confirms that the computational implementation agrees with the exact model over the generated scenarios.

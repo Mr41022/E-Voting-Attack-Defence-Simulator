@@ -1,0 +1,19 @@
+\begin{table}[htbp]
+\centering
+\caption{Headline experimental results across 2{,}500 paired randomised trials per vector.}
+\label{tab:headline}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrccr}
+\toprule
+Attack & Baseline & Protected & Absolute red. & Relative red. (\%) & 95\% CI & MC error & Bound holds (\%) \\
+\midrule
+Bribery & 0.350 & 0.064 & 0.287 & 81.859 & [0.269, 0.304] & 8.0e-05 & 100.000 \\
+Sybil & 0.480 & 0.136 & 0.345 & 71.779 & [0.327, 0.362] & 4.0e-04 & 100.000 \\
+Ballot Stuffing & 0.442 & 0.116 & 0.325 & 73.695 & [0.308, 0.343] & 3.9e-04 & 100.000 \\
+\bottomrule
+\end{tabular}%
+}
+\vspace{2pt}
+{\footnotesize\textit{Note.} Confidence intervals are bootstrap intervals on the mean paired reduction (10{,}000 resamples). ``Bound holds'' is the percentage of trials with a mathematically valid Chernoff region in which the bound was not violated.}
+\end{table}

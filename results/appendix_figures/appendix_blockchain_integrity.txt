@@ -1,0 +1,14 @@
+Figure:
+appendix_blockchain_integrity
+
+What this graph shows:
+The graph records the fraction of concrete experiment rows for which the blockchain remains internally valid after the attack simulation.
+
+Main observation:
+Across the existing records the chain integrity remains 100%, which confirms that election correctness and ledger correctness are being separated as separate measured facts.
+
+Why it matters:
+It matters because it shows that the blockchain layer can preserve a valid chain even when a fraudulent vote campaign changes the reported election outcome.
+
+Limitation:
+It does not show that the chain remains secure under every adversarial or external incident model.

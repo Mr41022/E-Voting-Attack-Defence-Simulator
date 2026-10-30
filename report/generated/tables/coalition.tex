@@ -1,0 +1,21 @@
+\begin{table}[htbp]
+\centering
+\caption{Optimal multi-vector budget allocation per scenario (baseline configuration).}
+\label{tab:coalition}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrlrr}
+\toprule
+Scenario & Bribery & Sybil & Ballot & $\mu_{\mathrm{total}}$ & Coalition $P$ & Best pure & Pure $P$ & Gain \\
+\midrule
+S1 & 35\% & 25\% & 40\% & 45 & 0.999 & Bribery & 0.423 & 0.576 \\
+S2 & 0\% & 5\% & 95\% & 2,077 & 1.000 & Bribery & 0.328 & 0.672 \\
+S3 & 0\% & 5\% & 95\% & 20,700 & 1.000 & Bribery & 0.320 & 0.680 \\
+S4 & 10\% & 0\% & 90\% & 5,695 & 1.000 & Bribery & 0.316 & 0.684 \\
+S5 & 100\% & 0\% & 0\% & 76 & 0.000 & Bribery & 0.000 & 0.000 \\
+\bottomrule
+\end{tabular}%
+}
+\vspace{2pt}
+{\footnotesize\textit{Note.} Shares are the fractions of one budget allocated to each vector. Coalition success probability is computed exactly, by convolving the three binomial distributions rather than approximating their sum.}
+\end{table}

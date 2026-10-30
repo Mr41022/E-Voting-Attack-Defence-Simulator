@@ -1,0 +1,9 @@
+\contentsline {table}{\numberline {1}{\ignorespaces What the literature supplies, and what it leaves open.}}{12}{table.caption.1}%
+\contentsline {table}{\numberline {2}{\ignorespaces Operationalisation of the model's variables.}}{22}{table.caption.2}%
+\contentsline {table}{\numberline {3}{\ignorespaces Randomised parameter ranges. Every trial draws one value per symbol uniformly from these ranges; the protected configuration modifies only the acceptance and detection probabilities, never $N$, $m$, $B$, $R$, $P$, $S$ or $A$.}}{28}{table.caption.3}%
+\contentsline {table}{\numberline {4}{\ignorespaces The five experiments, what each isolates, and what it produces.}}{28}{table.caption.4}%
+\contentsline {table}{\numberline {5}{\ignorespaces Summary of findings.}}{34}{table.caption.5}%
+\contentsline {table}{\numberline {6}{\ignorespaces Headline experimental results across 2{,}500 paired randomised trials per vector.}}{34}{table.caption.6}%
+\contentsline {table}{\numberline {7}{\ignorespaces Critical thresholds for the five benchmark scenarios under the baseline configuration.}}{41}{table.caption.12}%
+\contentsline {table}{\numberline {8}{\ignorespaces Capacity of each vector at full effort, as a multiple of the manipulation threshold $m$ (baseline configuration).}}{45}{table.caption.16}%
+\contentsline {table}{\numberline {9}{\ignorespaces Optimal multi-vector budget allocation per scenario (baseline configuration).}}{46}{table.caption.18}%

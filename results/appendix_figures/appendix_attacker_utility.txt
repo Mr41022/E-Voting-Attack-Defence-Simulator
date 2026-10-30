@@ -1,0 +1,14 @@
+Figure:
+appendix_attacker_utility
+
+What this graph shows:
+The graph represents the attacker-cost side of the utility relationship, shown against the bribe effort count.
+
+Main observation:
+The curve demonstrates a rising attack cost burden with more attempts, separating the mathematical temptation from the budget feasibility of the attack.
+
+Why it matters:
+It helps connect the game-theoretic search to the economic interpretation of the attack in the model.
+
+Limitation:
+It is only a derived proxy for utility and not a replacement for the full expected-utility definition.
