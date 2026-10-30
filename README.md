@@ -1,4 +1,4 @@
-SecureVoteSim
+##SecureVoteSim
 E-voting Attack Simulation & Countermeasure Evaluation
 SecureVoteSim is a research-oriented simulation project for studying the resilience of electronic voting systems under three adversarial scenarios: bribery, Sybil attacks, and ballot stuffing. It compares recorded attack outcomes under a baseline configuration with outcomes under a protected configuration, and uses statistical validation to assess the simulation results.
 
